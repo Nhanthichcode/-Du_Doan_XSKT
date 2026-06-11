@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Gui tin hieu Ping toi Render
         run: |
-          curl -I "https://du-doan-ket-qua-xskt.onrender.com/ping"        
+          curl -I "https://du-doan-xskt.onrender.com/ping"        
