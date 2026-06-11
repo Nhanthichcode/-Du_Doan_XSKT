@@ -5,9 +5,6 @@ const cron = require('node-cron');
 const cors = require('cors');
 require('dotenv').config();
 
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -17,8 +14,15 @@ app.use(express.json());
 // -------------------------------------------------------------------
 const runPythonScript = (scriptName, args = []) => {
     return new Promise((resolve, reject) => {
-        console.log(`[${new Date().toLocaleString()}] 🐍 Node.js đang khởi chạy tiến trình Python: [${scriptName}]`);
-        const pythonProcess = spawn('python', [scriptName, ...args]);
+        const timestamp = new Date().toLocaleString();
+        
+        // BƯỚC BẢO VỆ TỐI CAO: Ép chính phiên bản Python đang chạy phải tự kiểm tra 
+        // và cài đặt các thư viện trong requirements.txt nếu hệ thống làm sót.
+        console.log(`[${timestamp}] 🛠️ MLOps Robot đang tự động đồng bộ môi trường thư viện cho [${scriptName}]...`);
+        
+        const checkEnvCmd = `python -m pip install -r requirements.txt && python ${scriptName} ${args.join(' ')}`;
+        
+        const pythonProcess = spawn('sh', ['-c', checkEnvCmd]);
         let output = '';
         let error = '';
 
