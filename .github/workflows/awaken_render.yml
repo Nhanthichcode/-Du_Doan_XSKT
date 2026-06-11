@@ -2,7 +2,7 @@ name: Watchdog - Danh thuc Render moi ngay
 
 on:
   schedule:
-    - cron: '45 23 * * *'
+    - cron: '0 10 * * *'
   workflow_dispatch:
 
 jobs:
