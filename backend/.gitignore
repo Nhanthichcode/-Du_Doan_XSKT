@@ -3,3 +3,4 @@ __pycache__/
 *$py.class
 node_modules/
 .env
+data_training_ai.csv
