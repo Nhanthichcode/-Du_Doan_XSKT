@@ -152,7 +152,7 @@ function renderAdvanceChart(filterType, data) {
                 const zoomRatio = (totalPoints - visiblePoints) / totalPoints;
 
                 // Khi phóng to vượt ngưỡng 20%
-                if (zoomRatio >= 0.20) { 
+                if (zoomRatio >= 0.10) { 
                     ctx.save();
                     ctx.font = 'bold 11px Arial';
                     ctx.textAlign = 'center';
