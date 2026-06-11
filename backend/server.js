@@ -20,10 +20,10 @@ const runPythonScript = (scriptName, args = []) => {
         // và cài đặt các thư viện trong requirements.txt nếu hệ thống làm sót.
         console.log(`[${timestamp}] 🛠️ MLOps Robot đang tự động đồng bộ môi trường thư viện cho [${scriptName}]...`);
         
-        const checkEnvCmd = `python -m pip install -r requirements.txt && python ${scriptName} ${args.join(' ')}`;
+        // const checkEnvCmd = `python -m pip install -r requirements.txt && python ${scriptName} ${args.join(' ')}`;
         // Thêm cờ --break-system-packages để vượt qua cơ chế chặn PEP 668 của Linux mới
         // Thêm cờ -q (quiet) và điều hướng > /dev/null 2>&1 để giấu nhẹm mọi thông báo rác của pip
-        // const checkEnvCmd = `python -m pip install -q -r requirements.txt --break-system-packages > /dev/null 2>&1 && python ${scriptName} ${args.join(' ')}`;
+        const checkEnvCmd = `python -m pip install -q -r requirements.txt --break-system-packages > /dev/null 2>&1 && python ${scriptName} ${args.join(' ')}`;
 
 
         const pythonProcess = spawn('sh', ['-c', checkEnvCmd]);
