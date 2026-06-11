@@ -274,4 +274,5 @@ app.listen(PORT, () => {
     console.log("======================================================================");
     console.log(`🚀 [ONLINE] Node MLOps Backend đang kích hoạt tại Port ${PORT}`);
     console.log("======================================================================");
+    runDailyMLOpsPipeline();
 });
