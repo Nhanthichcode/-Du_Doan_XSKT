@@ -1,0 +1,15 @@
+name: Watchdog - Danh thuc Render moi ngay
+
+on:
+  schedule:
+    - cron: '45 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Gui tin hieu Ping toi Render
+        run: |
+          curl -I "https://du-doan-ket-qua-xskt.onrender.com/ping"        

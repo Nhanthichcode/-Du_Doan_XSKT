@@ -1,0 +1,38 @@
+name: Xuat ban Frontend len GitHub Pages
+
+# Kích hoạt khi có thay đổi được Push lên nhánh main, nhưng chỉ giới hạn trong thư mục frontend
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+  workflow_dispatch: # Cho phép bấm chạy thủ công
+
+# Cấp quyền cho GitHub Actions được ghi đè lên trang Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Cấu hình GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Đóng gói thư mục Frontend
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './frontend' # Chỉ định lấy đúng thư mục frontend để xuất bản web
+
+      - name: Triển khai lên Web
+        id: deployment
+        uses: actions/deploy-pages@v4
