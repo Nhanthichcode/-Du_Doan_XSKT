@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI XSMN - Hệ Thống Giám Sát Xu Hướng</title>
+    
+    <link rel="stylesheet" href="/frontend/css/style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Hệ Thống Phân Tích Lịch Sử & Dự Đoán AI XSMN</h1>
+
+        <div class="section-box backtest-zone">
+            <h3 class="section-title text-danger">🎯 Báo Cáo Đối Chiếu Lịch Sử Dự Đoán Lần Trước</h3>
+            <div id="backtest-list" class="grid-cards"></div>
+        </div>
+
+        <div class="section-box prediction-zone">
+            <h3 class="section-title text-success">🔮 Top 3 Số Vàng Dự Đoán Cho Ngày Tiếp Theo</h3>
+            <div id="prediction-list" class="grid-cards"></div>
+        </div>
+
+        <div class="chart-box">
+            <h3>📈 Biểu Đồ Xu Hướng Giải 8 Theo Trục Thời Gian</h3>
+            
+            <div class="toolbar-panel">
+                <div class="filter-bar">
+                    <label for="cbo-year">📅 Khoảng thời gian:</label>
+                    <select id="cbo-year">
+                        <option value="recent" selected>30 Kỳ Quay Gần Nhất</option>
+                        <option value="2026">Năm 2026</option>
+                        <option value="2025">Năm 2025</option>
+                        <option value="2020">Năm 2020</option>
+                        <option value="2015">Năm 2015</option>
+                        <option value="2006">Năm 2006</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="btn-select-all" class="btn-secondary">✓ Chọn Tất Cả Đài</button>
+                    <button id="btn-deselect-all" class="btn-danger-outline">✕ Bỏ Chọn Tất Cả</button>
+                </div>
+            </div>
+
+            <p class="chart-tip">💡 <b>Mẹo:</b> Cuộn chuột để Phóng to. Khi phóng to <b>&gt; 20%</b>, kết quả con số sẽ hiển thị trực tiếp ngay trong ô tròn.</p>
+            
+            <div class="chart-container">
+                <canvas id="historyLineChart"></canvas>
+            </div>
+
+            <div id="scrollbar-wrapper" class="scrollbar-container" style="display: none;">
+                <span class="scroll-label">◀ Kéo để di chuyển trục thời gian ▶</span>
+                <input type="range" id="chart-scrollbar" min="0" value="0" step="1">
+            </div>
+        </div>
+
+        <p class="timestamp">Hệ thống đóng gói dữ liệu lúc: <span id="lbl-time">---</span></p>
+    </div>
+
+    <script src="/frontend/js/dashboard_data.js"></script>
+    <script src="/frontend/js/app.js"></script>
+</body>
+</html>
