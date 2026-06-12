@@ -68,8 +68,11 @@ def crawl_missing_data():
 
         log_action(f"📡 Phát hiện hệ thống đang bị hổng {len(missing_dates)} ngày: {', '.join(d.strftime('%d-%m-%Y') for d in missing_dates)}")
 
+        # Thiết lập Header giả lập trình duyệt chuẩn để giảm thiểu bị Cloudflare chặn
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7"
         }
 
         tong_so_ban_ghi_da_luu = 0
@@ -90,19 +93,31 @@ def crawl_missing_data():
 
                 soup = BeautifulSoup(response.content, "html.parser")
 
-                # Thử tìm theo class trang chi tiết trước, nếu không thấy thì quét theo class bảng tổng hợp ngày công khai
+                # --- BẮT ĐẦU KHỐI IN LOG DEBUG CHI TIẾT ---
+                html_snippet = response.text[:500].replace('\n', ' ').strip()
+                log_action(f"🔍 [DEBUG HTML] 500 ký tự đầu tiên của trang: {html_snippet}")
+                
+                # Quét xem trên trang có tồn tại những Class bảng nào
+                all_tables = soup.find_all("table")
+                table_classes = [str(t.get('class', 'Không có class')) for t in all_tables]
+                log_action(f"🔍 [DEBUG TABLE] Tìm thấy {len(all_tables)} thẻ table trên trang. Danh sách class tìm được: {table_classes}")
+                # --- KẾT THÚC KHỐI LOG DEBUG ---
+
+                # Tiến hành tìm bảng dữ liệu theo các class nhận diện
                 box_kq = soup.find("table", class_="box_kqmien") or soup.find("table", class_="bkqmiennam")
 
-                # Giải pháp dự phòng cuối cùng: Tìm bất kỳ bảng nào có chứa tiêu đề đài th_tai_dai nếu cả 2 class trên bị hụt
                 if not box_kq:
-                    all_tables = soup.find_all("table")
                     for table in all_tables:
                         if table.find("th", class_="th_tai_dai"):
                             box_kq = table
                             break
 
                 if not box_kq:
-                    log_action(f"⚠️ Không tìm thấy bảng kết quả hợp lệ cho ngày {date_str}")
+                    log_action(f"⚠️ Không bóc tách được bảng kết quả cho ngày {date_str}. Tiến hành xuất file HTML lỗi để kiểm tra...")
+                    debug_file = os.path.join(BASE_DIR, f"debug_error_{date_str}.html")
+                    with open(debug_file, "w", encoding="utf-8") as f_err:
+                        f_err.write(response.text)
+                    log_action(f"💾 Đã lưu file HTML lỗi thực tế tại: {debug_file}. Bạn hãy kiểm tra file này hoặc push về local để xem nội dung!")
                     continue
 
                 tieu_de_dai = [
@@ -144,12 +159,10 @@ def crawl_missing_data():
                     row_data.update(cac_giai)
                     du_lieu_ngay_bo_sung.append(row_data)
 
-                # NẾU CÀO THÀNH CÔNG NGÀY NÀY -> TIẾN HÀNH GHI LƯU XUỐNG FILE NGAY LẬP TỨC
                 if du_lieu_ngay_bo_sung:
                     df_temp = pd.DataFrame(du_lieu_ngay_bo_sung)
                     file_exists = os.path.isfile(FILE_BO_SUNG)
 
-                    # Lưu file bổ sung
                     df_temp.to_csv(
                         FILE_BO_SUNG,
                         mode="a",
@@ -158,7 +171,6 @@ def crawl_missing_data():
                         encoding="utf-8-sig"
                     )
 
-                    # Gộp trực tiếp vào file tổng hợp vĩnh viễn
                     if os.path.exists(FILE_TONG_HOP):
                         df_main = pd.read_csv(FILE_TONG_HOP)
                         df_final = pd.concat([df_main, df_temp], ignore_index=True).drop_duplicates(
@@ -180,7 +192,6 @@ def crawl_missing_data():
             except Exception as crawl_err:
                 log_action(f"❌ Xảy ra sự cố lỗi mạng hoặc cấu trúc khi quét ngày {date_str}: {str(crawl_err)}")
 
-        # Sau khi kết thúc vòng lặp kiểm tra tổng lượng dữ liệu mới nạp được
         if tong_so_ban_ghi_da_luu == 0:
             log_action("❌ Tiến trình kết thúc: Không tích hợp được thêm bất kỳ dòng dữ liệu mới nào cho chu kỳ này.")
             print(json.dumps({
