@@ -28,3 +28,8 @@
 [09:47:11 12/6/2026] ✅ [THÀNH CÔNG] master_ai.py
 [09:47:34 12/6/2026] ✅ [THÀNH CÔNG] du_doan.py
 [09:48:00 12/6/2026] ✅ [THÀNH CÔNG] build_js_data.py
+[09:52:10 12/6/2026] ✅ [THÀNH CÔNG] cao_du_lieu_tu_dong.py
+[09:53:07 12/6/2026] ✅ [THÀNH CÔNG] chuyen_thanh_du_lieu_huan_luyen.py
+[09:56:03 12/6/2026] ✅ [THÀNH CÔNG] master_ai.py
+[09:56:26 12/6/2026] ✅ [THÀNH CÔNG] du_doan.py
+[09:56:52 12/6/2026] ✅ [THÀNH CÔNG] build_js_data.py
