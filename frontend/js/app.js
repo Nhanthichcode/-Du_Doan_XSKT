@@ -91,6 +91,7 @@ const paletteColors = [
                 historyChart.update();
                 initScrollbarControls(); // Cập nhật lại thanh kéo slider
             });
+                    loadHistoryPredictions();
         }
 
         function renderAdvanceChart(filterType, data) {
