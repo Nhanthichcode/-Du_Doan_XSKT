@@ -49,6 +49,7 @@ def predict_all_today_channels(data_file, model_file):
             print(json.dumps({"success": False, "error": f"Không tìm thấy đài mở thưởng Thứ {today_weekday}"}))
             return
 
+        # CHỈ LẤY G.8 (Khớp 100% với file dữ liệu huấn luyện)
         def get_day_lotos(row):
             val = str(row.get('G.8', '')).split('.')[0]
             nums = re.findall(r'\d{2,}', val)
@@ -67,6 +68,13 @@ def predict_all_today_channels(data_file, model_file):
             if len(df_dai) < 35: continue
 
             draw_results = df_dai.apply(get_day_lotos, axis=1).tolist()
+            
+            # Tính toán Lịch sử 5 kỳ gần nhất để đếm Tần suất Đầu/Đuôi (H_Freq, T_Freq)
+            history_5 = draw_results[-5:]
+            flat_5 = [item for sublist in history_5 for item in sublist]
+            h5 = [s[0] for s in flat_5] if flat_5 else []
+            t5 = [s[1] for s in flat_5] if flat_5 else []
+
             current_features = []
             for n in range(100):
                 s_num = f"{n:02d}"
@@ -75,15 +83,24 @@ def predict_all_today_channels(data_file, model_file):
                     if s_num in draw_results[j]: break
                     gap += 1
                 
+                # CUNG CẤP ĐỦ 8 CỘT ĐẶC TRƯNG MÀ MASTER_AI.PY YÊU CẦU
                 current_features.append({
-                    'So': n, 'Gap': gap,
-                    'Freq_10': sum(1 for res in draw_results[-10:] if s_num in res),
-                    'Freq_30': sum(1 for res in draw_results[-30:] if s_num in res),
-                    'Was_Last': 1 if s_num in draw_results[-1] else 0
+                    'So': n, 
+                    'Thu': today_weekday, 
+                    'Gap': gap,
+                    'F5': sum(1 for d in draw_results[-5:] if s_num in d),
+                    'F10': sum(1 for d in draw_results[-10:] if s_num in d),
+                    'F30': sum(1 for d in draw_results[-30:] if s_num in d),
+                    'H_Freq': h5.count(s_num[0]),
+                    'T_Freq': t5.count(s_num[1])
                 })
 
             X_predict = pd.DataFrame(current_features)
-            probs = model.predict_proba(X_predict[['So', 'Gap', 'Freq_10', 'Freq_30', 'Was_Last']])[:, 1]
+            
+            # Khai báo chính xác 8 cột đặc trưng mà AI yêu cầu
+            feature_cols = ['So', 'Thu', 'Gap', 'F5', 'F10', 'F30', 'H_Freq', 'T_Freq']
+            
+            probs = model.predict_proba(X_predict[feature_cols])[:, 1]
             X_predict['Xac_Suat'] = probs
             top_3 = X_predict.sort_values('Xac_Suat', ascending=False).head(3).reset_index(drop=True)
 
