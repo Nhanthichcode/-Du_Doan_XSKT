@@ -163,7 +163,7 @@ app.get('/ping', apiLimiter, verifySecretKey, (req, res) => {
 });
 
 // GIAO DIỆN XEM LOG LIVE TỰ ĐỘNG REFRESH MƯỢT MÀ
-app.get('/logs', apiLimiter, (req, res) => {
+app.get('/logs', (req, res) => {
     const logFilePath = path.join(__dirname, 'system_log.txt');
     if (req.query.raw === 'true') {
         if (fs.existsSync(logFilePath)) { res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.sendFile(logFilePath); }
