@@ -69,7 +69,7 @@ def predict_all_today_channels(data_file, model_file):
             output_data["results"].append(dai_result)
 
         # --- Ghi dữ liệu vào file JSON ---
-        file_path = 'history_predictions.json'
+        file_path = os.path.join('js', 'history_predictions.json')
         date_key = datetime.now().strftime('%d/%m/%Y')
         history = {}
         
