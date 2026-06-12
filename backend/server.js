@@ -26,38 +26,13 @@ const logAction = (message) => {
     }
 };
 
-// const runPythonScript = (scriptName, args = []) => {
-//     return new Promise((resolve, reject) => {
-//         logAction(`🛠️ Robot đang đồng bộ môi trường & chạy [${scriptName}]...`);
-
-//         const checkEnvCmd = `python -m pip install -q -r requirements.txt --break-system-packages > /dev/null 2>&1 && python ${scriptName} ${args.join(' ')}`;
-//         const pythonProcess = spawn('sh', ['-c', checkEnvCmd]);
-
-//         let output = '';
-//         let error = '';
-
-//         pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
-//         pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
-
-//         pythonProcess.on('close', (code) => {
-//             if (code === 0) {
-//                 logAction(`✅ [THÀNH CÔNG] ${scriptName}`);
-//                 resolve(output.trim());
-//             } else {
-//                 logAction(`❌ [THẤT BẠI] ${scriptName}: ${error}`);
-//                 reject(error);
-//             }
-//         });
-//     });
-// };
-
 const runPythonScript = (scriptName, args = []) => {
     return new Promise((resolve, reject) => {
-        logAction(`🛠️ Robot đang chạy tiến trình AI: [${scriptName}]...`);
-        
-        // Chạy trực tiếp script thay vì cài lại thư viện liên tục gây tốn tài nguyên
-        const pythonProcess = spawn('python', [scriptName, ...args]);
-        
+        logAction(`🛠️ Robot đang đồng bộ môi trường & chạy [${scriptName}]...`);
+
+        const checkEnvCmd = `python -m pip install -q -r requirements.txt --break-system-packages > /dev/null 2>&1 && python ${scriptName} ${args.join(' ')}`;
+        const pythonProcess = spawn('sh', ['-c', checkEnvCmd]);
+
         let output = '';
         let error = '';
 
@@ -75,6 +50,7 @@ const runPythonScript = (scriptName, args = []) => {
         });
     });
 };
+
 
 const autoPushToGitHub = () => {
     return new Promise((resolve, reject) => {
