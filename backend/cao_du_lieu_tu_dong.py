@@ -72,7 +72,7 @@ def crawl_missing_data():
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
 
-        du_lieu_bo_sung = []
+        tong_so_ban_ghi_da_luu = 0
 
         # Tiến hành cào cuốn chiếu từng ngày còn thiếu
         for current_date in missing_dates:
@@ -89,10 +89,20 @@ def crawl_missing_data():
                     continue
 
                 soup = BeautifulSoup(response.content, "html.parser")
-                box_kq = soup.find("table", class_="box_kqmien")
+
+                # Thử tìm theo class trang chi tiết trước, nếu không thấy thì quét theo class bảng tổng hợp ngày công khai
+                box_kq = soup.find("table", class_="box_kqmien") or soup.find("table", class_="bkqmiennam")
+
+                # Giải pháp dự phòng cuối cùng: Tìm bất kỳ bảng nào có chứa tiêu đề đài th_tai_dai nếu cả 2 class trên bị hụt
+                if not box_kq:
+                    all_tables = soup.find_all("table")
+                    for table in all_tables:
+                        if table.find("th", class_="th_tai_dai"):
+                            box_kq = table
+                            break
 
                 if not box_kq:
-                    log_action(f"⚠️ MinhNgoc chưa cập nhật bảng mở thưởng hoặc sai cấu trúc html ngày {date_str}")
+                    log_action(f"⚠️ Không tìm thấy bảng kết quả hợp lệ cho ngày {date_str}")
                     continue
 
                 tieu_de_dai = [
@@ -125,60 +135,64 @@ def crawl_missing_data():
                         so = cols[i + 1].get_text("\n", strip=True).replace("\n", " - ")
                         du_lieu_ngay[dai][giai] = so
 
+                du_lieu_ngay_bo_sung = []
                 for dai, cac_giai in du_lieu_ngay.items():
                     row_data = {
                         "Ngày": date_str,
                         "Đài": dai
                     }
                     row_data.update(cac_giai)
-                    du_lieu_bo_sung.append(row_data)
-                
-                log_action(f"   ↳ Trích xuất thành công dữ liệu các giải đài {date_str}.")
+                    du_lieu_ngay_bo_sung.append(row_data)
+
+                # NẾU CÀO THÀNH CÔNG NGÀY NÀY -> TIẾN HÀNH GHI LƯU XUỐNG FILE NGAY LẬP TỨC
+                if du_lieu_ngay_bo_sung:
+                    df_temp = pd.DataFrame(du_lieu_ngay_bo_sung)
+                    file_exists = os.path.isfile(FILE_BO_SUNG)
+
+                    # Lưu file bổ sung
+                    df_temp.to_csv(
+                        FILE_BO_SUNG,
+                        mode="a",
+                        index=False,
+                        header=not file_exists,
+                        encoding="utf-8-sig"
+                    )
+
+                    # Gộp trực tiếp vào file tổng hợp vĩnh viễn
+                    if os.path.exists(FILE_TONG_HOP):
+                        df_main = pd.read_csv(FILE_TONG_HOP)
+                        df_final = pd.concat([df_main, df_temp], ignore_index=True).drop_duplicates(
+                            subset=["Ngày", "Đài"],
+                            keep="last"
+                        )
+                    else:
+                        df_final = df_temp
+
+                    df_final.to_csv(
+                        FILE_TONG_HOP,
+                        index=False,
+                        encoding="utf-8-sig"
+                    )
+
+                    tong_so_ban_ghi_da_luu += len(du_lieu_ngay_bo_sung)
+                    log_action(f"💾 [CUỐN CHIẾU] Đã gộp thành công dữ liệu ngày {date_str} vào tệp {FILE_TONG_HOP}")
 
             except Exception as crawl_err:
-                log_action(f"❌ Xảy ra sự cố lỗi mạng khi quét ngày {date_str}: {str(crawl_err)}")
+                log_action(f"❌ Xảy ra sự cố lỗi mạng hoặc cấu trúc khi quét ngày {date_str}: {str(crawl_err)}")
 
-        # Kiểm tra nếu hoàn toàn không lấy thêm được dữ liệu mới nào
-        if not du_lieu_bo_sung:
-            log_action("❌ Tiến trình kết thúc thất bại: Không bóc tách được bất kỳ dòng dữ liệu mới nào.")
+        # Sau khi kết thúc vòng lặp kiểm tra tổng lượng dữ liệu mới nạp được
+        if tong_so_ban_ghi_da_luu == 0:
+            log_action("❌ Tiến trình kết thúc: Không tích hợp được thêm bất kỳ dòng dữ liệu mới nào cho chu kỳ này.")
             print(json.dumps({
                 "success": False,
                 "message": "Không lấy được dữ liệu mới."
             }))
             return
 
-        # 3. TIẾN HÀNH GHI LƯU VÀ ĐỒNG BỘ FILE CỨNG
-        log_action(f"💾 Đang tiến hành lưu và gộp {len(du_lieu_bo_sung)} dòng thông tin mới vào kho lưu trữ...")
-        df_temp = pd.DataFrame(du_lieu_bo_sung)
-        file_exists = os.path.isfile(FILE_BO_SUNG)
-
-        df_temp.to_csv(
-            FILE_BO_SUNG,
-            mode="a",
-            index=False,
-            header=not file_exists,
-            encoding="utf-8-sig"
-        )
-
-        if os.path.exists(FILE_TONG_HOP):
-            df_main = pd.read_csv(FILE_TONG_HOP)
-            df_final = pd.concat([df_main, df_temp], ignore_index=True).drop_duplicates(
-                subset=["Ngày", "Đài"],
-                keep="last"
-            )
-        else:
-            df_final = df_temp
-
-        df_final.to_csv(
-            FILE_TONG_HOP,
-            index=False,
-            encoding="utf-8-sig"
-        )
-
-        log_action(f"🎉 Hoàn tất chu kỳ cào! Đã tích hợp thành công dữ liệu mới vào tệp {FILE_TONG_HOP}")
+        log_action(f"🎉 Hoàn tất chu kỳ cào! Tổng cộng đã bổ sung vĩnh viễn {tong_so_ban_ghi_da_luu} bản ghi mới.")
         print(json.dumps({
             "success": True,
-            "message": f"Đã cập nhật {len(du_lieu_bo_sung)} bản ghi mới từ {len(missing_dates)} ngày thiếu."
+            "message": f"Đã cập nhật hoàn tất {tong_so_ban_ghi_da_luu} bản ghi mới lên hệ thống."
         }))
 
     except Exception as e:
