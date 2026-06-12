@@ -26,13 +26,38 @@ const logAction = (message) => {
     }
 };
 
+// const runPythonScript = (scriptName, args = []) => {
+//     return new Promise((resolve, reject) => {
+//         logAction(`🛠️ Robot đang đồng bộ môi trường & chạy [${scriptName}]...`);
+
+//         const checkEnvCmd = `python -m pip install -q -r requirements.txt --break-system-packages > /dev/null 2>&1 && python ${scriptName} ${args.join(' ')}`;
+//         const pythonProcess = spawn('sh', ['-c', checkEnvCmd]);
+
+//         let output = '';
+//         let error = '';
+
+//         pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
+//         pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
+
+//         pythonProcess.on('close', (code) => {
+//             if (code === 0) {
+//                 logAction(`✅ [THÀNH CÔNG] ${scriptName}`);
+//                 resolve(output.trim());
+//             } else {
+//                 logAction(`❌ [THẤT BẠI] ${scriptName}: ${error}`);
+//                 reject(error);
+//             }
+//         });
+//     });
+// };
+
 const runPythonScript = (scriptName, args = []) => {
     return new Promise((resolve, reject) => {
-        logAction(`🛠️ Robot đang đồng bộ môi trường & chạy [${scriptName}]...`);
-
-        const checkEnvCmd = `python -m pip install -q -r requirements.txt --break-system-packages > /dev/null 2>&1 && python ${scriptName} ${args.join(' ')}`;
-        const pythonProcess = spawn('sh', ['-c', checkEnvCmd]);
-
+        logAction(`🛠️ Robot đang chạy tiến trình AI: [${scriptName}]...`);
+        
+        // Chạy trực tiếp script thay vì cài lại thư viện liên tục gây tốn tài nguyên
+        const pythonProcess = spawn('python', [scriptName, ...args]);
+        
         let output = '';
         let error = '';
 
@@ -139,6 +164,18 @@ app.get('/ping', (req, res) => {
     runDailyMLOpsPipeline();
 });
 
+app.get('/logs', (req, res) => {
+    const logFilePath = path.join(__dirname, 'system_log.txt');
+    
+    // Kiểm tra xem file có tồn tại không
+    if (fs.existsSync(logFilePath)) {
+        // Trả file text về trình duyệt với định dạng UTF-8
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.sendFile(logFilePath);
+    } else {
+        res.status(404).send("❌ Chưa có file log nào được tạo trên hệ thống.");
+    }
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     logAction("======================================================================");
