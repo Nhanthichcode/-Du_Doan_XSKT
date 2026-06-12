@@ -140,18 +140,72 @@ app.get('/ping', (req, res) => {
     runDailyMLOpsPipeline();
 });
 
+// API xem log hệ thống tự động cập nhật thời gian thực (Real-time Polling)
 app.get('/logs', (req, res) => {
     const logFilePath = path.join(__dirname, 'system_log.txt');
     
-    // Kiểm tra xem file có tồn tại không
-    if (fs.existsSync(logFilePath)) {
-        // Trả file text về trình duyệt với định dạng UTF-8
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        res.sendFile(logFilePath);
-    } else {
-        res.status(404).send("❌ Chưa có file log nào được tạo trên hệ thống.");
+    // Nếu Client yêu cầu dữ liệu thô (AJAX gọi ngầm dưới nền)
+    if (req.query.raw === 'true') {
+        if (fs.existsSync(logFilePath)) {
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            return res.sendFile(logFilePath);
+        }
+        return res.status(404).send("Chưa có log.");
     }
+
+    // Ngược lại, trả về giao diện HTML tự động Fetch dữ liệu mới mỗi 2 giây
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head>
+            <meta charset="UTF-8">
+            <title>Hệ Thống Giám Sát Log MLOps</title>
+            <style>
+                body { background-color: #1e1e1e; color: #d4d4d4; font-family: 'Consolas', monospace; padding: 20px; margin: 0; }
+                h2 { color: #4fc1ff; border-bottom: 1px solid #3e3e3e; padding-bottom: 10px; margin-top: 0; }
+                pre { white-space: pre-wrap; word-wrap: break-word; background: #252526; padding: 15px; border-radius: 5px; border: 1px solid #3c3c3c; height: calc(100vh - 100px); overflow-y: auto; }
+                .status { font-size: 12px; color: #85c46c; margin-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <h2>Nhật Ký Hệ Thống MLOps Live</h2>
+            <div class="status" id="status">● Đang kết nối thời gian thực (Tự động cập nhật mỗi 2 giây)...</div>
+            <pre id="log-content">Đang nạp nhật ký hành động...</pre>
+
+            <script>
+                const logBox = document.getElementById('log-content');
+                const statusBox = document.getElementById('status');
+
+                async function fetchNewLogs() {
+                    try {
+                        // Gọi API lấy file text thô ngầm
+                        const response = await fetch('/logs?raw=true');
+                        if (response.ok) {
+                            const text = await response.text();
+                            
+                            // Kiểm tra nếu nội dung có sự thay đổi thì mới cập nhật và cuộn chuột xuống cuối
+                            if (logBox.innerText !== text.trim()) {
+                                logBox.innerText = text.trim();
+                                logBox.scrollTop = logBox.scrollHeight; 
+                                statusBox.innerText = "● Vừa cập nhật lúc: " + new Date().toLocaleTimeString();
+                                statusBox.style.color = "#85c46c";
+                            }
+                        }
+                    } catch (err) {
+                        statusBox.innerText = "✕ Mất kết nối tới máy chủ Render...";
+                        statusBox.style.color = "#f44336";
+                    }
+                }
+
+                // Cứ mỗi 2000ms (2 giây) tự động gửi request lấy log mới mà không làm lag trang
+                setInterval(fetchNewLogs, 2000);
+                fetchNewLogs(); // Chạy ngay lần đầu khi vừa mở trang
+            </script>
+        </body>
+        </html>
+    `);
 });
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     logAction("======================================================================");
