@@ -12,4 +12,5 @@ jobs:
     steps:
       - name: Gui tin hieu Ping toi Render
         run: |
-          curl -I "https://du-doan-xskt.onrender.com/ping?secret=PomxMixGeoo1234@@@@$4321"        
+          curl -X GET "https://du-doan-xskt.onrender.com/ping" \
+          -H "X-Secret-Key: ${{ secrets.MLOPS_SECRET_KEY }}"
