@@ -51,5 +51,58 @@
         }
       ]
     }
+  ],
+  "12/06/2026": [
+    {
+      "dai": "Bến Tre",
+      "predictions": [
+        {
+          "so": "67",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "55",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "55",
+          "xac_suat": 44.9
+        }
+      ]
+    },
+    {
+      "dai": "Bạc Liêu",
+      "predictions": [
+        {
+          "so": "44",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "30",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "06",
+          "xac_suat": 44.9
+        }
+      ]
+    },
+    {
+      "dai": "Vũng Tàu",
+      "predictions": [
+        {
+          "so": "73",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "54",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "46",
+          "xac_suat": 44.9
+        }
+      ]
+    }
   ]
 }
