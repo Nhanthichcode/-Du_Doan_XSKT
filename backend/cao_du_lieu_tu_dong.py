@@ -120,16 +120,30 @@ def crawl_missing_data():
                     log_action(f"💾 Đã lưu file HTML lỗi thực tế tại: {debug_file}. Bạn hãy kiểm tra file này hoặc push về local để xem nội dung!")
                     continue
 
-                tieu_de_dai = [
-                    th.get_text(strip=True)
-                    for th in box_kq.find_all("th", class_="th_tai_dai")
-                ]
+                tieu_de_dai = []
+                
+                # Cách 1: Tìm qua thẻ th class th_tai_dai truyền thống
+                for th in box_kq.find_all("th", class_="th_tai_dai"):
+                    tieu_de_dai.append(th.get_text(strip=True))
+                
+                # Cách 2: Nếu cách 1 hụt, tìm ở các ô tiêu đề dòng đầu tiên (áp dụng cho bkqmiennam)
+                if not tieu_de_dai:
+                    first_row = box_kq.find("tr")
+                    if first_row:
+                        # Tìm tất cả td hoặc th ở dòng đầu tiên đại diện cho cột đài mở thưởng
+                        cols_header = first_row.find_all(["td", "th"])
+                        for col in cols_header:
+                            text = col.get_text(strip=True)
+                            # Bỏ qua ô góc tiêu đề chữ "Giải" hoặc rỗng
+                            if text and "Ngày" not in text and text != "Giải" and text != "Giao diện":
+                                # Loại bỏ ký tự thừa hoặc chữ viết tắt nếu có
+                                tieu_de_dai.append(text)
 
                 if not tieu_de_dai:
                     log_action(f"⚠️ Không bóc tách được danh sách tên đài mở thưởng ngày {date_str}")
                     continue
 
-                log_action(f"📊 Phát hiện {len(tieu_de_dai)} đài quay thưởng ngày {date_str}: {', '.join(tieu_de_dai)}")
+                log_action(f"📊 Đã bóc tách thành công {len(tieu_de_dai)} đài mở thưởng: {', '.join(tieu_de_dai)}")
 
                 rows = box_kq.find_all("tr")
                 du_lieu_ngay = {dai: {} for dai in tieu_de_dai}
