@@ -1,0 +1,108 @@
+{
+  "10/06/2026": [
+    {
+      "dai": "Bến Tre",
+      "predictions": [
+        {
+          "so": "77",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "75",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "30",
+          "xac_suat": 44.9
+        }
+      ]
+    },
+    {
+      "dai": "Bạc Liêu",
+      "predictions": [
+        {
+          "so": "83",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "03",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "36",
+          "xac_suat": 44.9
+        }
+      ]
+    },
+    {
+      "dai": "Vũng Tàu",
+      "predictions": [
+        {
+          "so": "62",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "92",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "28",
+          "xac_suat": 44.9
+        }
+      ]
+    }
+  ],
+  "12/06/2026": [
+    {
+      "dai": "Bến Tre",
+      "predictions": [
+        {
+          "so": "67",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "55",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "55",
+          "xac_suat": 44.9
+        }
+      ]
+    },
+    {
+      "dai": "Bạc Liêu",
+      "predictions": [
+        {
+          "so": "44",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "30",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "06",
+          "xac_suat": 44.9
+        }
+      ]
+    },
+    {
+      "dai": "Vũng Tàu",
+      "predictions": [
+        {
+          "so": "73",
+          "xac_suat": 72.4
+        },
+        {
+          "so": "54",
+          "xac_suat": 58.1
+        },
+        {
+          "so": "46",
+          "xac_suat": 44.9
+        }
+      ]
+    }
+  ]
+}
