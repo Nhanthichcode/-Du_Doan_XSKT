@@ -1,4 +1,4 @@
-// Bảng màu cho các đường Line đồ thị đài
+ // Bảng màu cho các đường Line đồ thị đài
         const paletteColors = [
             '#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'
         ];
@@ -6,7 +6,75 @@
         let historyChart = null;
         let currentTimelineX = []; // Lưu trữ trục X hiện hành để phục vụ thanh kéo
 
-        // HÀM TẢI LỊCH SỬ DỰ ĐOÁN TỪ FILE JSON NGOẠI VI (GIỮ NGUYÊN TOÀN BỘ LOGIC BẠN GỬI)
+        // KHỞI TẠO THANH KÉO CHO DANH SÁCH ĐỐI CHIẾU LỊCH SỬ KỲ TRƯỚC (ĐỒNG BỘ 2 CHIỀU)
+        function initBacktestSlider(dates) {
+            const wrapper = document.getElementById('backtest-slider-wrapper');
+            const slider = document.getElementById('backtest-slider');
+            const label = document.getElementById('backtest-slider-label');
+            const container = document.getElementById('backtest-list-container');
+            const listDiv = document.getElementById('backtest-list');
+
+            if (!dates || dates.length <= 1) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            wrapper.style.display = 'block';
+            slider.min = 0;
+            slider.max = dates.length - 1;
+            slider.value = 0; // Mặc định ở kỳ đầu tiên
+            
+            label.innerText = `Kỳ ngày: ${dates[0]}`;
+
+            let isDragging = false;
+
+            // Khi người dùng kéo thanh trượt (Kéo sang phải/trái để cuộn danh sách)
+            slider.addEventListener('input', (e) => {
+                isDragging = true;
+                const idx = parseInt(e.target.value);
+                const targetDate = dates[idx];
+                label.innerText = `Kỳ ngày: ${targetDate}`;
+
+                // Tìm thẻ card đầu tiên thuộc ngày này và cuộn danh sách tới vị trí đó
+                const targetCard = listDiv.querySelector(`[data-date="${targetDate}"]`);
+                if (targetCard) {
+                    container.scrollTo({
+                        top: targetCard.offsetTop - listDiv.offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+                
+                // Mở khóa kéo sau khi cuộn hoàn tất mượt mà
+                setTimeout(() => { isDragging = false; }, 200);
+            });
+
+            // Đồng bộ hóa ngược lại: Khi người dùng cuộn danh sách thủ công bằng chuột hoặc vuốt
+            container.addEventListener('scroll', () => {
+                if (isDragging) return; // Nếu đang kéo slider thì không ghi đè lại giá trị
+
+                const cards = listDiv.querySelectorAll('.card');
+                let closestIdx = 0;
+                let minDiff = Infinity;
+
+                cards.forEach(card => {
+                    // Tính khoảng cách từ đỉnh phần tử card tới đỉnh vùng nhìn thấy
+                    const diff = Math.abs(card.offsetTop - listDiv.offsetTop - container.scrollTop);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        const cardDate = card.getAttribute('data-date');
+                        const idx = dates.indexOf(cardDate);
+                        if (idx !== -1) {
+                            closestIdx = idx;
+                        }
+                    }
+                });
+
+                slider.value = closestIdx;
+                label.innerText = `Kỳ ngày: ${dates[closestIdx]}`;
+            });
+        }
+
+        // HÀM TẢI LỊCH SỬ DỰ ĐOÁN TỪ FILE JSON NGOẠI VI (CẬP NHẬT LẤY 10 KỲ GẦN NHẤT)
         async function loadHistoryPredictions() {
             const backtestDiv = document.getElementById('backtest-list');
             if (!backtestDiv) return;
@@ -20,11 +88,14 @@
                 
                 let backtestHtml = "";
                 
-                // Duyệt qua từng ngày để hiển thị
-                dates.slice(0, 5).forEach(date => {
+                // CẬP NHẬT: Lấy đúng 10 kỳ gần nhất thay vì 5 kỳ
+                const selectedDates = dates.slice(0, 10);
+                
+                // Duyệt qua tối đa 10 kỳ để hiển thị
+                selectedDates.forEach(date => {
                     historyData[date].forEach(item => {
                         backtestHtml += `
-                            <div class="card">
+                            <div class="card" data-date="${date}">
                                 <div class="card-label">Đài: ${item.dai}</div>
                                 <div class="card-subtext" style="font-size: 11px;">Ngày: ${date}</div>
                                 <div class="card-subtext">Dự đoán: <strong>${item.predictions.map(p => String(p.so).padStart(2, '0')).join(', ')}</strong></div>
@@ -34,11 +105,34 @@
                 });
                 
                 backtestDiv.innerHTML = backtestHtml;
+                
+                // Khởi tạo thanh kéo đồng bộ 10 kỳ
+                initBacktestSlider(selectedDates);
+
             } catch (err) {
                 console.warn("Chưa có dữ liệu lịch sử hoặc file không tồn tại.");
-                // Không ghi đè thông báo lỗi nếu đã có sẵn dữ liệu từ xoso_data tĩnh
-                if (backtestDiv.innerHTML.trim() === "") {
-                    backtestDiv.innerHTML = `<p class="text-muted">Chưa có dữ liệu lịch sử.</p>`;
+                // Trường hợp chạy file tĩnh độc lập (fallback), lấy dữ liệu xoso_data tĩnh để dựng thanh kéo
+                if (backtestDiv.innerHTML.trim() === "" || backtestDiv.innerHTML.includes("Dữ liệu lưu vết")) {
+                    const data = xoso_data;
+                    let staticHtml = "";
+                    if (data.backtest_history && data.backtest_history.length > 0) {
+                        data.backtest_history.forEach(item => {
+                            staticHtml += `
+                                <div class="card" data-date="${item.date}">
+                                    <div class="card-label">Đài: ${item.dai}</div>
+                                    <div class="card-subtext">${item.date}</div>
+                                    <div style="margin-top: 6px;">Giải 8 về: <span style="color: var(--accent-red); font-weight: 700;">${String(item.real_number).padStart(2, '0')}</span></div>
+                                    <div class="card-subtext">AI đoán: [${item.ai_numbers.map(n => String(n).padStart(2, '0')).join(', ')}]</div>
+                                    <div style="margin-top: 6px; font-size: 12px;">
+                                        ${item.success ? `<span style="color: var(--accent-green); font-weight: 600;">🎯 Trúng mục tiêu</span>` : `<span style="color: var(--text-muted);">Chưa trúng</span>`}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        backtestDiv.innerHTML = staticHtml;
+                        const uniqueDates = [...new Set(data.backtest_history.map(item => item.date))];
+                        initBacktestSlider(uniqueDates);
+                    }
                 }
             }
         }
@@ -57,10 +151,11 @@
             let backtestHtml = "";
             if (data.backtest_history.length === 0) {
                 backtestHtml = `<p style="color: var(--text-muted); padding: 10px; font-size: 13px;">Dữ liệu lưu vết sẽ xuất hiện sau vòng quay ngày kế tiếp.</p>`;
+                backtestDiv.innerHTML = backtestHtml;
             } else {
                 data.backtest_history.forEach(item => {
                     backtestHtml += `
-                        <div class="card">
+                        <div class="card" data-date="${item.date}">
                             <div class="card-label">Đài: ${item.dai}</div>
                             <div class="card-subtext">${item.date}</div>
                             <div style="margin-top: 6px;">Giải 8 về: <span style="color: var(--accent-red); font-weight: 700;">${String(item.real_number).padStart(2, '0')}</span></div>
@@ -71,8 +166,10 @@
                         </div>
                     `;
                 });
+                backtestDiv.innerHTML = backtestHtml;
+                const uniqueDates = [...new Set(data.backtest_history.map(item => item.date))];
+                initBacktestSlider(uniqueDates);
             }
-            backtestDiv.innerHTML = backtestHtml;
 
             // --- 2. HIỂN THỊ TOP 3 HÔM NAY ---
             const predictDiv = document.getElementById('prediction-list');
@@ -110,7 +207,7 @@
 
             // --- ĐỒNG BỘ SIÊU TỐC VÀ MƯỢT MÀ ---
             
-            // Sự kiện nút Bỏ chọn tất cả các tỉnh (Thực thi ẩn ngay lập tức các số hiển thị đè và trượt ẩn đường trong 300ms)
+            // Sự kiện nút Bỏ chọn tất cả các tỉnh
             document.getElementById('btn-deselect-all').addEventListener('click', () => {
                 if (!historyChart) return;
                 historyChart.data.datasets.forEach((dataset, index) => {
@@ -120,7 +217,7 @@
                 initScrollbarControls(); // Cập nhật lại thanh kéo slider
             });
 
-            // Sự kiện nút Chọn lại tất cả các tỉnh (Thực thi hiện lại mượt mà trong 300ms)
+            // Sự kiện nút Chọn lại tất cả các tỉnh
             document.getElementById('btn-select-all').addEventListener('click', () => {
                 if (!historyChart) return;
                 historyChart.data.datasets.forEach((dataset, index) => {
@@ -130,7 +227,7 @@
                 initScrollbarControls(); // Cập nhật lại thanh kéo slider
             });
 
-            // Kích hoạt hàm tải lịch sử bổ sung
+            // Kích hoạt hàm tải lịch sử bổ sung lấy 10 kỳ từ tệp JSON
             loadHistoryPredictions();
         }
 
