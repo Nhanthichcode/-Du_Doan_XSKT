@@ -90,7 +90,7 @@ const autoPushToGitHub = () => {
         const repoUrl = `https://${token}@github.com/${user}/${repo}.git`;
         
         // CHỈ ĐỊNH RÕ 4 FILE CẦN LƯU VÀ DÙNG --AUTOSTASH ĐỂ CHỐNG KẸT LỆNH PULL
-        const filesToAdd = `../frontend/js/dashboard_data.js xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl system_log.txt history_predictions.json`;
+        const filesToAdd = `../frontend/js/dashboard_data.js ../frontend/js/history_predictions.json xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl system_log.txt`;
         // const pushCmd = `git add ${filesToAdd} && (git commit -m "Robot: Tự động cập nhật dữ liệu MLOps ngày mới" || true) && git pull ${repoUrl} main --rebase --autostash && git push ${repoUrl} HEAD:main`;
         const pushCmd = `
             git add ${filesToAdd} && 
