@@ -1,76 +1,52 @@
 import pandas as pd
 import json
 import os
-import random
 from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_FILE = os.path.join(BASE_DIR, 'system_log.txt')
-OUTPUT_DIR = os.path.join(BASE_DIR, '..', 'frontend', 'js')
-
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 DATA_FILE = os.path.join(BASE_DIR, 'xsmn_tong_hop_20_nam.csv')
-DB_HISTORY_PRED = os.path.join(OUTPUT_DIR, 'history_predictions.json') 
-OUTPUT_JS = os.path.join(OUTPUT_DIR, 'dashboard_data.js')
+PRED_FILE = os.path.join(BASE_DIR, '..', 'frontend', 'js', 'history_predictions.json')
+OUTPUT_JS = os.path.join(BASE_DIR, '..', 'frontend', 'js', 'dashboard_data.js')
 
-def log_action(message):
-    timestamp = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-    log_entry = f"[{timestamp}] [PYTHON - build_data] {message}\n"
-    try:
-        with open(LOG_FILE, 'a', encoding='utf-8') as f:
-            f.write(log_entry)
-        print(log_entry.strip())
-    except:
-        pass
-
-def export_permanent_mlops_data():
-    log_action("Bắt đầu đóng gói dữ liệu tĩnh JS...")
-    
-    if not os.path.exists(DATA_FILE):
-        log_action("❌ Không tìm thấy file dữ liệu gốc.")
-        return
-
+def update_dashboard():
+    # 1. Đọc dữ liệu lịch sử
     df = pd.read_csv(DATA_FILE, dtype=str)
     df['Date_DT'] = pd.to_datetime(df['Ngày'], dayfirst=True)
-    df = df.sort_values('Date_DT').reset_index(drop=True)
     
-    all_dates = sorted(df['Ngày'].unique(), key=lambda x: datetime.strptime(x, '%d/%m/%Y'))
-    all_channels = df['Đài'].unique().tolist()
+    # Chỉ lấy 30 ngày gần nhất để dashboard chạy nhanh
+    recent_dates = sorted(df['Date_DT'].unique())[-30:]
     
-    historical_lines = {}
-    for channel in all_channels:
-        historical_lines[channel] = [None] * len(all_dates)
-        df_channel = df[df['Đài'] == channel]
-        for _, row in df_channel.iterrows():
-            date_idx = all_dates.index(row['Ngày'])
-            try:
-                historical_lines[channel][date_idx] = int(str(row['G.8']).split('.')[0][-2:])
-            except: pass
+    timeline_x = [d.strftime('%d/%m/%Y') for d in recent_dates]
+    lines_y = {}
 
-    today_str = datetime.now().strftime('%d/%m/%Y')
-    
-    if os.path.exists(DB_HISTORY_PRED):
-        with open(DB_HISTORY_PRED, 'r', encoding='utf-8') as f:
-            try: history_predictions = json.load(f)
-            except: history_predictions = {}
-    else:
-        history_predictions = {}
+    # Lấy dữ liệu giải 8 cho các đài
+    for dai in df['Đài'].unique():
+        lines_y[dai] = []
+        for d in recent_dates:
+            val = df[(df['Đài'] == dai) & (df['Date_DT'] == d)]['G.8'].values
+            lines_y[dai].append(val[0] if len(val) > 0 else None)
 
-    final_package = {
+    # 2. Đọc dự đoán mới nhất (nếu có)
+    predictions = {}
+    if os.path.exists(PRED_FILE):
+        with open(PRED_FILE, 'r', encoding='utf-8') as f:
+            predictions = json.load(f)
+
+    # 3. Đóng gói JSON
+    data = {
         "build_time": datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-        "timeline_x": all_dates,
-        "lines_y": historical_lines,
-        "top_3_today": history_predictions.get(today_str, []),
-        "backtest_history": [] 
+        "timeline_x": timeline_x,
+        "lines_y": lines_y,
+        "predictions": predictions
     }
+
+    # 4. Ghi file JS (Dạng biến hằng số để frontend load)
+    js_content = f"const xoso_data = {json.dumps(data, indent=2, ensure_ascii=False)};"
     
     with open(OUTPUT_JS, 'w', encoding='utf-8') as f:
-        f.write("const xoso_data = ")
-        json.dump(final_package, f, ensure_ascii=False, indent=2)
-        f.write(";")
-        
-    log_action(f"🎉 Đã tạo thành công file tĩnh tại: {OUTPUT_JS}")
+        f.write(js_content)
+    
+    print(f"🎉 Đã cập nhật xong dữ liệu mới vào {OUTPUT_JS} lúc {data['build_time']}")
 
 if __name__ == "__main__":
-    export_permanent_mlops_data()
+    update_dashboard()
