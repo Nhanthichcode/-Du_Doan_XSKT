@@ -9,6 +9,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const fs = require('fs');
+const path = require('path');
+
+// Đường dẫn file log cố định tại thư mục gốc của dự án
+const logPath = path.join(__dirname, 'system_log.txt');
+
+const logAction = (message) => {
+    try {
+        const timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        const logEntry = `[${timestamp}] ${message}\n`;
+        
+        // Ghi log vào file (tự tạo nếu chưa có)
+        fs.appendFileSync(logPath, logEntry, 'utf8');
+        console.log(logEntry.trim());
+    } catch (err) {
+        console.error("❌ Không thể ghi vào file log:", err);
+    }
+};
+
 // -------------------------------------------------------------------
 // 1. HÀM CHẠY TIẾN TRÌNH PYTHON ĐỒNG BỘ
 // -------------------------------------------------------------------
@@ -34,11 +53,18 @@ const runPythonScript = (scriptName, args = []) => {
         pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
 
         pythonProcess.on('close', (code) => {
+            // if (code === 0) {
+            //     resolve(output.trim());
+            // } else {
+            //     console.error(`[${new Date().toLocaleString()}] ❌ Thất bại tại tiến trình ${scriptName}:`, error);
+            //     reject(`Lỗi tại file ${scriptName}: ${error}`);
+            // }
             if (code === 0) {
+                logAction(`✅ [THÀNH CÔNG] ${scriptName}`);
                 resolve(output.trim());
             } else {
-                console.error(`[${new Date().toLocaleString()}] ❌ Thất bại tại tiến trình ${scriptName}:`, error);
-                reject(`Lỗi tại file ${scriptName}: ${error}`);
+                logAction(`❌ [THẤT BẠI] ${scriptName}: ${error}`);
+                reject(error);
             }
         });
     });
@@ -64,9 +90,15 @@ const autoPushToGitHub = () => {
         const repoUrl = `https://${token}@github.com/${user}/${repo}.git`;
         
         // CHỈ ĐỊNH RÕ 4 FILE CẦN LƯU VÀ DÙNG --AUTOSTASH ĐỂ CHỐNG KẸT LỆNH PULL
-        const filesToAdd = `../frontend/js/dashboard_data.js xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl`;
-        const pushCmd = `git add ${filesToAdd} && (git commit -m "Robot: Tự động cập nhật dữ liệu MLOps ngày mới" || true) && git pull ${repoUrl} main --rebase --autostash && git push ${repoUrl} HEAD:main`;
-        
+        const filesToAdd = `../frontend/js/dashboard_data.js xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl system_log.txt`;
+        // const pushCmd = `git add ${filesToAdd} && (git commit -m "Robot: Tự động cập nhật dữ liệu MLOps ngày mới" || true) && git pull ${repoUrl} main --rebase --autostash && git push ${repoUrl} HEAD:main`;
+        const pushCmd = `
+            git add ${filesToAdd} && 
+            git commit -m "Robot: Cập nhật dữ liệu MLOps - $(date '+%Y-%m-%d %H:%M:%S')" && 
+            git pull ${repoUrl} main --rebase --autostash && 
+            git push ${repoUrl} HEAD:main
+        `;
+
         exec(`${configCmd} && ${pushCmd}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`[${new Date().toLocaleString()}] ❌ Lỗi tự động push GitHub:`, stderr || error);
@@ -100,8 +132,7 @@ const runDailyMLOpsPipeline = async () => {
 
         // Bước 3: Huấn luyện AI
         console.log("\n👉 [BƯỚC 3/6] Tái huấn luyện mô hình học máy Random Forest...");
-        const trainLog = await runPythonScript('master_ai.py');
-        console.log("📊 Nhật ký học máy (Model Metrics):", trainLog);
+        const trainLog = await runPythonScript('master_ai.py');        
         console.log("✅ Hoàn thành Bước 3.");
 
         // Bước 4: Chạy dự đoán hôm nay
