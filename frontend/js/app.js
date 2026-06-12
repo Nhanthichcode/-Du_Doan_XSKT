@@ -5,6 +5,39 @@ const paletteColors = [
         let historyChart = null;
         let currentTimelineX = []; // Lưu trữ trục X hiện hành để phục vụ thanh kéo
 
+        async function loadHistoryPredictions() {
+    const backtestDiv = document.getElementById('backtest-list');
+    if (!backtestDiv) return;
+
+    try {
+        const response = await fetch('js/history_predictions.json');
+        if (!response.ok) throw new Error("Không tìm thấy file");
+        
+        const historyData = await response.json();
+        const dates = Object.keys(historyData).reverse(); // Lấy ngày mới nhất trước
+        
+        let backtestHtml = "";
+        
+        // Duyệt qua từng ngày để hiển thị
+        dates.slice(0, 5).forEach(date => {
+            historyData[date].forEach(item => {
+                backtestHtml += `
+                    <div class="card">
+                        <div class="card-label">Đài: ${item.dai}</div>
+                        <div class="card-subtext" style="font-size: 11px;">Ngày: ${date}</div>
+                        <div class="card-subtext">Dự đoán: <strong>${item.predictions.map(p => String(p.so).padStart(2, '0')).join(', ')}</strong></div>
+                    </div>
+                `;
+            });
+        });
+        
+        backtestDiv.innerHTML = backtestHtml;
+    } catch (err) {
+        console.warn("Chưa có dữ liệu lịch sử hoặc file không tồn tại.");
+        backtestDiv.innerHTML = `<p class="text-muted">Chưa có dữ liệu lịch sử.</p>`;
+    }
+}
+
         function initPermanentDashboard() {
             if (typeof xoso_data === 'undefined') {
                 console.error("❌ Không tìm thấy biến dữ liệu xoso_data tĩnh!");
