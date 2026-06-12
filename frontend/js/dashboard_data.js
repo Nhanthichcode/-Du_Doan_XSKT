@@ -1,5 +1,5 @@
 const xoso_data = {
-  "build_time": "12/06/2026 02:56:51",
+  "build_time": "12/06/2026 03:05:20",
   "timeline_x": [
     "01/05/2006",
     "02/05/2006",
@@ -156801,15 +156801,15 @@ const xoso_data = {
       "dai": "Bến Tre",
       "predictions": [
         {
-          "so": "61",
+          "so": "05",
           "xac_suat": 72.4
         },
         {
-          "so": "38",
+          "so": "83",
           "xac_suat": 58.1
         },
         {
-          "so": "22",
+          "so": "15",
           "xac_suat": 44.9
         }
       ]
@@ -156818,15 +156818,15 @@ const xoso_data = {
       "dai": "Bạc Liêu",
       "predictions": [
         {
-          "so": "14",
+          "so": "75",
           "xac_suat": 72.4
         },
         {
-          "so": "41",
+          "so": "92",
           "xac_suat": 58.1
         },
         {
-          "so": "28",
+          "so": "09",
           "xac_suat": 44.9
         }
       ]
@@ -156835,15 +156835,15 @@ const xoso_data = {
       "dai": "Vũng Tàu",
       "predictions": [
         {
-          "so": "45",
+          "so": "04",
           "xac_suat": 72.4
         },
         {
-          "so": "13",
+          "so": "80",
           "xac_suat": 58.1
         },
         {
-          "so": "54",
+          "so": "12",
           "xac_suat": 44.9
         }
       ]
