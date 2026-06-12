@@ -5,7 +5,7 @@ const paletteColors = [
         let historyChart = null;
         let currentTimelineX = []; // Lưu trữ trục X hiện hành để phục vụ thanh kéo
 
-        async function loadHistoryPredictions() {
+    async function loadHistoryPredictions() {
     const backtestDiv = document.getElementById('backtest-list');
     if (!backtestDiv) return;
 
@@ -124,7 +124,7 @@ const paletteColors = [
                 historyChart.update();
                 initScrollbarControls(); // Cập nhật lại thanh kéo slider
             });
-                    loadHistoryPredictions();
+            loadHistoryPredictions();
         }
 
         function renderAdvanceChart(filterType, data) {

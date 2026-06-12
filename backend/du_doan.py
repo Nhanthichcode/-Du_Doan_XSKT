@@ -5,9 +5,32 @@ import json
 import os
 from datetime import datetime
 
+# 1. ĐỊNH NGHĨA ĐƯỜNG DẪN CHUẨN
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(BASE_DIR, 'system_log.txt')
+OUTPUT_DIR = os.path.join(BASE_DIR, '..', 'frontend', 'js')
+HISTORY_FILE = os.path.join(OUTPUT_DIR, 'history_predictions.json')
+
+# 2. HÀM GHI LOG VÀO SYSTEM_LOG.TXT
+def log_action(message):
+    timestamp = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    log_entry = f"[{timestamp}] [PYTHON - du_doan] {message}\n"
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(log_entry)
+        print(log_entry.strip())
+    except:
+        print(log_entry.strip())
+
 def predict_all_today_channels(data_file, model_file):
     try:
+        log_action("Bắt đầu chạy thuật toán dự đoán AI...")
+        
+        # Đảm bảo thư mục đích tồn tại
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+
         if not os.path.exists(data_file) or not os.path.exists(model_file):
+            log_action("❌ Lỗi: Thiếu file dữ liệu hoặc mô hình AI.")
             print(json.dumps({"success": False, "error": "Thiếu file dữ liệu hoặc mô hình AI."}))
             return
 
@@ -22,6 +45,7 @@ def predict_all_today_channels(data_file, model_file):
         today_channels = recent_records['Đài'].unique().tolist()
 
         if not today_channels:
+            log_action(f"⚠️ Không tìm thấy đài mở thưởng Thứ {today_weekday}")
             print(json.dumps({"success": False, "error": f"Không tìm thấy đài mở thưởng Thứ {today_weekday}"}))
             return
 
@@ -68,27 +92,28 @@ def predict_all_today_channels(data_file, model_file):
                 dai_result["predictions"].append({"so": f"{int(row['So']):02d}", "xac_suat": round(float(row['Xac_Suat']) * 100, 2)})
             output_data["results"].append(dai_result)
 
-        # --- Ghi dữ liệu vào file JSON ---
-        file_path = os.path.join('js', 'history_predictions.json')
+        # --- Ghi dữ liệu vào file JSON chuẩn ---
         date_key = datetime.now().strftime('%d/%m/%Y')
         history = {}
         
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
                 try: history = json.load(f)
                 except: history = {}
 
         if date_key not in history:
             history[date_key] = output_data["results"]
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
                 json.dump(history, f, ensure_ascii=False, indent=2)
-            print(f"✅ Đã lưu dự đoán cho ngày {date_key}")
+            log_action(f"✅ Đã tạo & ghi đè dự đoán ngày {date_key} vào {HISTORY_FILE}")
         else:
-            print(f"⚠️ Ngày {date_key} đã có dự đoán, không ghi đè.")
+            log_action(f"⚠️ Ngày {date_key} đã tồn tại trong file lịch sử, bỏ qua ghi đè.")
 
         print(json.dumps(output_data, ensure_ascii=False))
+        log_action("Hoàn tất tiến trình dự đoán.")
 
     except Exception as e:
+        log_action(f"❌ Lỗi nghiêm trọng: {str(e)}")
         print(json.dumps({"success": False, "error": str(e)}))
 
 if __name__ == "__main__":
