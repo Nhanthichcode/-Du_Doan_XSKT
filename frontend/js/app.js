@@ -1,42 +1,47 @@
-const paletteColors = [
+// Bảng màu cho các đường Line đồ thị đài
+        const paletteColors = [
             '#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'
         ];
 
         let historyChart = null;
         let currentTimelineX = []; // Lưu trữ trục X hiện hành để phục vụ thanh kéo
 
-    async function loadHistoryPredictions() {
-    const backtestDiv = document.getElementById('backtest-list');
-    if (!backtestDiv) return;
+        // HÀM TẢI LỊCH SỬ DỰ ĐOÁN TỪ FILE JSON NGOẠI VI (GIỮ NGUYÊN TOÀN BỘ LOGIC BẠN GỬI)
+        async function loadHistoryPredictions() {
+            const backtestDiv = document.getElementById('backtest-list');
+            if (!backtestDiv) return;
 
-    try {
-        const response = await fetch('js/history_predictions.json');
-        if (!response.ok) throw new Error("Không tìm thấy file");
-        
-        const historyData = await response.json();
-        const dates = Object.keys(historyData).reverse(); // Lấy ngày mới nhất trước
-        
-        let backtestHtml = "";
-        
-        // Duyệt qua từng ngày để hiển thị
-        dates.slice(0, 5).forEach(date => {
-            historyData[date].forEach(item => {
-                backtestHtml += `
-                    <div class="card">
-                        <div class="card-label">Đài: ${item.dai}</div>
-                        <div class="card-subtext" style="font-size: 11px;">Ngày: ${date}</div>
-                        <div class="card-subtext">Dự đoán: <strong>${item.predictions.map(p => String(p.so).padStart(2, '0')).join(', ')}</strong></div>
-                    </div>
-                `;
-            });
-        });
-        
-        backtestDiv.innerHTML = backtestHtml;
-    } catch (err) {
-        console.warn("Chưa có dữ liệu lịch sử hoặc file không tồn tại.");
-        backtestDiv.innerHTML = `<p class="text-muted">Chưa có dữ liệu lịch sử.</p>`;
-    }
-}
+            try {
+                const response = await fetch('js/history_predictions.json');
+                if (!response.ok) throw new Error("Không tìm thấy file");
+                
+                const historyData = await response.json();
+                const dates = Object.keys(historyData).reverse(); // Lấy ngày mới nhất trước
+                
+                let backtestHtml = "";
+                
+                // Duyệt qua từng ngày để hiển thị
+                dates.slice(0, 5).forEach(date => {
+                    historyData[date].forEach(item => {
+                        backtestHtml += `
+                            <div class="card">
+                                <div class="card-label">Đài: ${item.dai}</div>
+                                <div class="card-subtext" style="font-size: 11px;">Ngày: ${date}</div>
+                                <div class="card-subtext">Dự đoán: <strong>${item.predictions.map(p => String(p.so).padStart(2, '0')).join(', ')}</strong></div>
+                            </div>
+                        `;
+                    });
+                });
+                
+                backtestDiv.innerHTML = backtestHtml;
+            } catch (err) {
+                console.warn("Chưa có dữ liệu lịch sử hoặc file không tồn tại.");
+                // Không ghi đè thông báo lỗi nếu đã có sẵn dữ liệu từ xoso_data tĩnh
+                if (backtestDiv.innerHTML.trim() === "") {
+                    backtestDiv.innerHTML = `<p class="text-muted">Chưa có dữ liệu lịch sử.</p>`;
+                }
+            }
+        }
 
         function initPermanentDashboard() {
             if (typeof xoso_data === 'undefined') {
@@ -103,27 +108,29 @@ const paletteColors = [
                 renderAdvanceChart(e.target.value, data);
             });
 
-            // --- LOGIC SỬA LỖI ĐỒNG BỘ: SỬ DỤNG HÀM HIDE/SHOW CHUẨN CỦA CHART.JS ---
+            // --- ĐỒNG BỘ SIÊU TỐC VÀ MƯỢT MÀ ---
             
-            // Sự kiện nút Bỏ chọn tất cả các tỉnh
+            // Sự kiện nút Bỏ chọn tất cả các tỉnh (Thực thi ẩn ngay lập tức các số hiển thị đè và trượt ẩn đường trong 300ms)
             document.getElementById('btn-deselect-all').addEventListener('click', () => {
                 if (!historyChart) return;
                 historyChart.data.datasets.forEach((dataset, index) => {
-                    historyChart.hide(index); // Sử dụng hàm ẩn chuẩn của ChartJS API
+                    historyChart.setDatasetVisibility(index, false); // Đặt trạng thái ẩn trực tiếp cho dữ liệu
                 });
-                historyChart.update();
+                historyChart.update(); // Chạy hoạt ảnh mượt mà đúng 300ms theo cấu hình biểu đồ
                 initScrollbarControls(); // Cập nhật lại thanh kéo slider
             });
 
-            // Sự kiện nút Chọn lại tất cả các tỉnh
+            // Sự kiện nút Chọn lại tất cả các tỉnh (Thực thi hiện lại mượt mà trong 300ms)
             document.getElementById('btn-select-all').addEventListener('click', () => {
                 if (!historyChart) return;
                 historyChart.data.datasets.forEach((dataset, index) => {
-                    historyChart.show(index); // Sử dụng hàm hiện chuẩn của ChartJS API
+                    historyChart.setDatasetVisibility(index, true); // Đặt trạng thái hiện trực tiếp
                 });
-                historyChart.update();
+                historyChart.update(); // Chạy hoạt ảnh mượt mà đúng 300ms theo cấu hình biểu đồ
                 initScrollbarControls(); // Cập nhật lại thanh kéo slider
             });
+
+            // Kích hoạt hàm tải lịch sử bổ sung
             loadHistoryPredictions();
         }
 
@@ -177,6 +184,10 @@ const paletteColors = [
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    // Giới hạn tất cả hoạt ảnh hiển thị/ẩn/thay đổi về đúng 300ms mượt mà
+                    animation: {
+                        duration: 300
+                    },
                     scales: {
                         x: { min: 0, max: filteredLabels.length - 1 },
                         y: { min: 0, max: 99, ticks: { callback: v => String(v).padStart(2, '0') } }
@@ -212,7 +223,7 @@ const paletteColors = [
                                 ctx.textBaseline = 'middle';
 
                                 chart.data.datasets.forEach((dataset, dIdx) => {
-                                    // Kiểm tra xem đài này có đang hiển thị thực tế trên bản đồ không
+                                    // SỬA LỖI: Nhãn số của đài bị ẩn sẽ không hiển thị đè lên nữa (biến mất ngay lập tức)
                                     if (chart.isDatasetVisible(dIdx)) {
                                         const meta = chart.getDatasetMeta(dIdx);
                                         meta.data.forEach((element, pIdx) => {
