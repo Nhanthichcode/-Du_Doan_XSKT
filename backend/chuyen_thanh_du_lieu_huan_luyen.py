@@ -16,26 +16,22 @@ def generate_training_data():
         df_raw['Date_DT'] = pd.to_datetime(df_raw['Ngày'], dayfirst=True)
         df_raw['Thu'] = df_raw['Date_DT'].dt.dayofweek + 2
 
+        # SỬA LẠI: CHỈ TRÍCH XUẤT DUY NHẤT GIẢI 8 (G.8)
         def get_day_lotos(row):
-            lotos = []
-            cols = ['G.8', 'G.7', 'G.6', 'G.5', 'G.4', 'G.3', 'G.2', 'G.1', 'ĐB']
-            for col in cols:
-                val = str(row.get(col, '')).split('.')[0]
-                nums = re.findall(r'\d{2,}', val)
-                for n in nums: lotos.append(n[-2:])
-            return list(set(lotos))
+            val = str(row.get('G.8', '')).split('.')[0]
+            nums = re.findall(r'\d{2,}', val)
+            return [n[-2:] for n in nums]
 
         all_training_data = []
 
         for dai, group in df_raw.groupby('Đài'):
             group = group.sort_values('Date_DT').reset_index(drop=True)
-            if len(group) < 35: continue
-            
             draws = group.apply(get_day_lotos, axis=1).tolist()
             thus = group['Thu'].tolist()
             
-            # Giới hạn lấy tối đa 150 kỳ gần nhất của mỗi đài để tránh tràn RAM trên Render Free
-            start_idx = max(30, len(group) - 150)
+            # Bỏ qua 30 kỳ đầu tiên để làm nhịp Gap
+            start_idx = 30
+            if len(group) <= start_idx: continue
             
             for i in range(start_idx, len(group)):
                 history_5 = draws[i-5:i]
@@ -64,7 +60,8 @@ def generate_training_data():
 
         df_ml = pd.DataFrame(all_training_data)
         df_ml.to_csv(output_file, index=False)
-        print(json.dumps({"success": True, "message": "Xử lý dữ liệu 8 cột thành công!"}))
+        print(json.dumps({"success": True, "message": f"Đã tạo {len(df_ml)} dòng dữ liệu huấn luyện."}))
+
     except Exception as e:
         print(json.dumps({"success": False, "error": str(e)}))
 
