@@ -55,6 +55,14 @@ const apiLimiter = rateLimit({
     legacyHeaders: false, 
 });
 
+app.get('/', (req, res) => {
+    logAction("⚠️ Phát hiện một truy cập trái phép cố tình vào gốc định tuyến / của Render.");
+    return res.status(403).json({
+        success: false,
+        error: "Access Denied: Máy chủ này chỉ phục vụ các tác vụ API MLOps nội bộ."
+    });
+});
+
 app.use('/api/', apiLimiter);
 
 const verifySecretKey = (req, res, next) => {
@@ -237,18 +245,16 @@ app.get('/logs', logLimiter, (req, res) => {
     `);
 });
 
-app.use(express.static(path.join(__dirname, '../frontend')));
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
     try {
-        logAction("🔄 [AUTO-START] Hệ thống bắt đầu nạp cấu hình chạy thử nghiệm tự động...");
+        logAction("[AUTO-START] Hệ thống bắt đầu nạp cấu hình chạy thử nghiệm tự động...");
         await initPythonEnvironment();
         
-        logAction("⚡ [AUTO-START] Kích hoạt chuỗi quy trình chính (Pipeline Check)...");
+        logAction("[AUTO-START] Kích hoạt chuỗi quy trình chính (Pipeline Check)...");
         // Khi server vừa build xong, tự khởi chạy luôn pipeline kiểm tra xem có dữ liệu mới không
         runDailyMLOpsPipeline();
     } catch (startErr) {
-        logAction(`💥 [AUTO-START] Lỗi khởi động: ${startErr.message}`);
+        logAction(`[AUTO-START] Lỗi khởi động: ${startErr.message}`);
     }
 });
