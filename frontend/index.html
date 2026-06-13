@@ -266,53 +266,53 @@
 
     <!-- LOGIC BẢO MẬT & TẢI DỮ LIỆU ĐỘNG -->
     <script>
-        document.getElementById('btn-login').addEventListener('click', checkLogin);
-        document.getElementById('auth-password').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkLogin();
+     const BACKEND_URL = 'https://du-doan-xskt.onrender.com';
+
+document.getElementById('btn-login').addEventListener('click', checkLogin);
+document.getElementById('auth-password').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') checkLogin();
+});
+
+async function checkLogin() {
+    const inputPass = document.getElementById('auth-password').value;
+    const errorMsg = document.getElementById('login-error');
+    
+    try {
+        // 1. Gửi mật khẩu thô lên Render bằng URL tuyệt đối để đối soát
+        const response = await fetch(`${BACKEND_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: inputPass })
         });
 
-        async function checkLogin() {
-            const inputPass = document.getElementById('auth-password').value;
-            const errorMsg = document.getElementById('login-error');
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            // 2. Nếu Render trả về đúng, ẩn overlay đăng nhập và hiện giao diện chính
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-app-wrapper').style.display = 'block';
             
-            try {
-                // Gửi yêu cầu xác thực an toàn tới Endpoint Backend của Render
-                const response = await fetch('https://du-doan-xskt.onrender.com/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ password: inputPass })
-                });
+            // 3. Tải trực tiếp file dữ liệu tĩnh nằm ở thư mục js/ trên hosting GitHub Pages
+            const dataScript = document.createElement('script');
+            dataScript.src = 'js/dashboard_data.js'; 
+            document.body.appendChild(dataScript);
 
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    // 1. Ẩn màn hình đăng nhập, hiện giao diện chính
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('main-app-wrapper').style.display = 'block';
-                    
-                    // 2. Chỉ tải file dữ liệu SAU KHI đăng nhập thành công
-                    const dataScript = document.createElement('script');
-                    dataScript.src = 'js/dashboard_data.js';
-                    document.body.appendChild(dataScript);
-
-                    dataScript.onload = () => {
-                        // 3. Khi dữ liệu tải xong, mới tải tiếp app logic
-                        const appScript = document.createElement('script');
-                        appScript.src = 'js/app.js';
-                        document.body.appendChild(appScript);
-                    };
-                } else {
-                    errorMsg.textContent = data.message || "Mật khẩu không chính xác!";
-                    errorMsg.style.display = 'block';
-                }
-            } catch (error) {
-                console.error("Lỗi đăng nhập:", error);
-                errorMsg.textContent = "Không thể kết nối đến máy chủ xác thực!";
-                errorMsg.style.display = 'block';
-            }
+            dataScript.onload = () => {
+                // 4. Khi dữ liệu 20 năm tải xong, nạp tiếp file logic app.js cục bộ
+                const appScript = document.createElement('script');
+                appScript.src = 'js/app.js';
+                document.body.appendChild(appScript);
+            };
+        } else {
+            errorMsg.textContent = data.message || "Mật khẩu không chính xác!";
+            errorMsg.style.display = 'block';
         }
+    } catch (error) {
+        console.error("Lỗi đăng nhập:", error);
+        errorMsg.textContent = "Không thể kết nối đến máy chủ xác thực Render!";
+        errorMsg.style.display = 'block';
+    }
+}
     </script>
 </body>
 </html>
