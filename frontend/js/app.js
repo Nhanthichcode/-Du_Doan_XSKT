@@ -1,5 +1,3 @@
-const BACKEND_URL = 'https://du-doan-xskt.onrender.com';
-
 let allHistoricalRecords = [];
 let predictionsData = [];
 let backtestData = [];
@@ -11,25 +9,21 @@ let tableCurrentPage = 1;
 const tablePageSize = 10;
 let filteredTableData = [];
 
-// [THAY ĐỔI QUAN TRỌNG NHẤT]: Đưa toàn bộ logic khởi tạo vào hàm startApp()
-function startApp() {
+document.addEventListener("DOMContentLoaded", () => {
     initApp();
     loadRealData();
 
     const btnToggle = document.getElementById("btn-toggle-sidebar");
     const appContainer = document.getElementById("app-container");
-    if (btnToggle && appContainer) {
-        btnToggle.addEventListener("click", () => {
-            appContainer.classList.toggle("sidebar-collapsed");
-            setTimeout(() => { if (chartInstance) chartInstance.resize(); }, 300);
-        });
-    }
+    btnToggle.addEventListener("click", () => {
+        appContainer.classList.toggle("sidebar-collapsed");
+        setTimeout(() => { if (chartInstance) chartInstance.resize(); }, 300);
+    });
 
     document.getElementById("cbo-timeframe").addEventListener("change", (e) => renderChart(e.target.value));
     
     const searchInput = document.getElementById("table-search-input");
     const filterYearSelect = document.getElementById("table-filter-year");
-    
     const updateTableFilters = () => {
         const searchVal = searchInput.value.toLowerCase().trim();
         const yearVal = filterYearSelect.value;
@@ -41,7 +35,6 @@ function startApp() {
         tableCurrentPage = 1;
         renderHistoricalTable();
     };
-    
     searchInput.addEventListener("input", updateTableFilters);
     filterYearSelect.addEventListener("change", updateTableFilters);
 
@@ -67,8 +60,7 @@ function startApp() {
         appendTerminalLog("[SYSTEM] Kích hoạt tiến trình phân tích tự động từ giao diện...", "log-warn");
         
         try {
-            // [THAY ĐỔI]: Gọi API /ping không cần truyền Bearer Token nữa
-            const res = await fetch(`${BACKEND_URL}/ping`);
+            const res = await fetch('https://du-doan-xskt.onrender.com/ping');
             if (res.ok) {
                 const data = await res.json();
                 appendTerminalLog(`[SUCCESS] ${data.message || 'Lệnh kích hoạt thành công.'}`, "log-success");
@@ -87,7 +79,7 @@ function startApp() {
 
     fetchSystemLog();
     setInterval(fetchSystemLog, 15000);
-}
+});
 
 function initApp() {
     const today = new Date();
@@ -120,12 +112,12 @@ async function loadRealData() {
     filteredTableData = [...allHistoricalRecords];
 
     try {
-        // [THAY ĐỔI]: Đọc file JSON trực tiếp từ thư mục cục bộ của GitHub Pages không cần Token
         const res = await fetch('js/history_predictions.json');
         if (res.ok) {
             const json = await res.json();
             predictionsData = json.results || json.predictions || [];
             backtestData = json.backtest || [];
+            
             if (json.ngay_du_doan) {
                 document.getElementById('lbl-pred-date').textContent = json.ngay_du_doan;
             }
@@ -236,8 +228,7 @@ function renderBacktestUI() {
 
 async function fetchSystemLog() {
     try {
-        // [THAY ĐỔI]: Kéo API log từ URL của Render không kèm Token
-        const res = await fetch(`${BACKEND_URL}/api/system-log`);
+        const res = await fetch('https://du-doan-xskt.onrender.com/api/system-log');
         if (res.ok) {
             const text = await res.text();
             const logs = text.split('\n').filter(l => l.trim() !== '');
@@ -412,13 +403,4 @@ function renderHistoricalTable() {
     document.getElementById("table-entries-info").textContent = `Bản ghi từ ${startIndex + 1} đến ${endIndex} / Tổng ${filteredTableData.length}`;
     document.getElementById("btn-table-prev").disabled = tableCurrentPage === 1;
     document.getElementById("btn-table-next").disabled = endIndex >= filteredTableData.length;
-}
-
-// [THAY ĐỔI QUAN TRỌNG]: Logic Lazy-loading
-// Thay vì chờ DOMContentLoaded (vốn dĩ đã chạy qua mất rồi do app.js được load chậm từ index.html)
-// Chúng ta tự kiểm tra nếu trang đã load xong thì chạy luôn hàm startApp().
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startApp);
-} else {
-    startApp(); // Chạy khởi tạo ứng dụng ngay lập tức
 }
