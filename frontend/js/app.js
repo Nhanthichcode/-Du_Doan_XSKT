@@ -6,92 +6,92 @@ const paletteColors = [
         let currentTimelineX = []; // Lưu trữ trục X hiện hành để phục vụ thanh kéo
 
         function initPermanentDashboard() {
-            if (typeof xoso_data === 'undefined') {
-                console.error("❌ Không tìm thấy biến dữ liệu xoso_data tĩnh!");
-                return;
-            }
+    if (typeof xoso_data === 'undefined') {
+        console.error("❌ Không tìm thấy biến dữ liệu xoso_data tĩnh!");
+        return;
+    }
 
-            const data = xoso_data;
-            document.getElementById('lbl-time').innerText = data.build_time;
+    const data = xoso_data;
+    document.getElementById('lbl-time').innerText = data.build_time;
 
-            // --- 1. HIỂN THỊ BÁO CÁO ĐỐI CHIẾU KẾT QUẢ VĨNH VIỄN ---
-            const backtestDiv = document.getElementById('backtest-list');
-            let backtestHtml = "";
-            if (data.backtest_history.length === 0) {
-                backtestHtml = `<p style="color: var(--text-muted); padding: 10px; font-size: 13px;">Dữ liệu lưu vết sẽ xuất hiện sau vòng quay ngày kế tiếp.</p>`;
-            } else {
-                data.backtest_history.forEach(item => {
-                    backtestHtml += `
-                        <div class="card">
-                            <div class="card-label">Đài: ${item.dai}</div>
-                            <div class="card-subtext">${item.date}</div>
-                            <div style="margin-top: 6px;">Giải 8 về: <span style="color: var(--accent-red); font-weight: 700;">${String(item.real_number).padStart(2, '0')}</span></div>
-                            <div class="card-subtext">AI đoán: [${item.ai_numbers.map(n => String(n).padStart(2, '0')).join(', ')}]</div>
-                            <div style="margin-top: 6px; font-size: 12px;">
-                                ${item.success ? `<span style="color: var(--accent-green); font-weight: 600;">🎯 Trúng mục tiêu</span>` : `<span style="color: var(--text-muted);">Chưa trúng</span>`}
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            backtestDiv.innerHTML = backtestHtml;
+    // 1. Load và hiển thị Dự đoán & Đối chiếu từ file JSON riêng biệt
+    fetch('js/history_predictions.json')
+        .then(response => response.json())
+        .then(historyJson => {
+            // Lấy danh sách ngày và sắp xếp
+            const dates = Object.keys(historyJson).sort((a, b) => {
+                const dateA = new Date(a.split('/').reverse().join('/'));
+                const dateB = new Date(b.split('/').reverse().join('/'));
+                return dateB - dateA; // Ngày mới nhất lên đầu
+            });
 
-            // --- 2. HIỂN THỊ TOP 3 HÔM NAY ---
+            const latestDate = dates[0];
             const predictDiv = document.getElementById('prediction-list');
+            const backtestDiv = document.getElementById('backtest-list');
+
+            // --- HIỂN THỊ DỰ ĐOÁN MỚI NHẤT ---
             let predictHtml = "";
-            data.top_3_today.forEach(item => {
+            historyJson[latestDate].forEach(item => {
                 predictHtml += `
-                    <div class="card" style="background-color: var(--bg-card); border-color: var(--border-color);">
-                        <div class="card-label" style="color: var(--accent-green); margin-bottom: 8px; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">Đài: ${item.dai}</div>
-                        <div style="display:flex; flex-direction:column; gap:6px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span>1st: <span class="badge" style="background-color: var(--accent-red);">${String(item.predictions[0].so).padStart(2, '0')}</span></span>
-                                <span style="font-size: 12px; color: var(--text-muted);">${item.predictions[0].xac_suat}%</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span>2nd: <span class="badge" style="background-color: var(--accent-orange);">${String(item.predictions[1].so).padStart(2, '0')}</span></span>
-                                <span style="font-size: 12px; color: var(--text-muted);">${item.predictions[1].xac_suat}%</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span>3rd: <span class="badge" style="background-color: var(--primary);">${String(item.predictions[2].so).padStart(2, '0')}</span></span>
-                                <span style="font-size: 12px; color: var(--text-muted);">${item.predictions[2].xac_suat}%</span>
-                            </div>
+                    <div class="card">
+                        <div class="card-label">Đài: ${item.dai}</div>
+                        <div style="font-size: 13px; margin-top: 5px;">
+                            ${item.predictions.map((p, i) => `<div>${i+1}st: <b>${p.so}</b> (${p.xac_suat}%)</div>`).join('')}
                         </div>
                     </div>
                 `;
             });
             predictDiv.innerHTML = predictHtml;
 
-            // --- 3. KHỞI TẠO BIỂU ĐỒ HOẠT ĐỘNG (MẶC ĐỊNH LÀ 30 KỲ GẦN NHẤT) ---
-            renderAdvanceChart('recent', data);
+            // --- HIỂN THỊ LỊCH SỬ ĐỐI CHIẾU ---
+            let backtestHtml = "";
+            // Duyệt qua các ngày cũ (từ ngày thứ 2 trở đi)
+            for (let i = 1; i < dates.length; i++) {
+                const date = dates[i];
+                historyJson[date].forEach(pred => {
+                    // Tìm giải 8 thực tế trong xoso_data.lines_y để đối chiếu
+                    const realValues = data.lines_y[pred.dai] || [];
+                    const dateIndex = data.timeline_x.indexOf(date);
+                    const realResult = (dateIndex !== -1) ? realValues[dateIndex] : null;
 
-            // Sự kiện bộ lọc năm
-            document.getElementById('cbo-year').addEventListener('change', (e) => {
-                renderAdvanceChart(e.target.value, data);
-            });
-
-            // --- LOGIC SỬA LỖI ĐỒNG BỘ: SỬ DỤNG HÀM HIDE/SHOW CHUẨN CỦA CHART.JS ---
-            
-            // Sự kiện nút Bỏ chọn tất cả các tỉnh
-            document.getElementById('btn-deselect-all').addEventListener('click', () => {
-                if (!historyChart) return;
-                historyChart.data.datasets.forEach((dataset, index) => {
-                    historyChart.hide(index); // Sử dụng hàm ẩn chuẩn của ChartJS API
+                    if (realResult !== null) {
+                        const isWin = pred.predictions.some(p => String(p.so) === String(realResult).padStart(2, '0'));
+                        backtestHtml += `
+                            <div class="card">
+                                <div class="card-label">Đài: ${pred.dai}</div>
+                                <div class="card-subtext">${date}</div>
+                                <div style="margin-top: 6px;">Giải 8: <span style="color: var(--accent-red); font-weight: 700;">${String(realResult).padStart(2, '0')}</span></div>
+                                <div class="card-subtext">AI đoán: [${pred.predictions.map(p => p.so).join(', ')}]</div>
+                                <div style="margin-top: 6px; font-size: 12px;">
+                                    ${isWin ? `<span style="color: var(--accent-green); font-weight: 600;">🎯 Trúng</span>` : `<span style="color: var(--text-muted);">Trượt</span>`}
+                                </div>
+                            </div>
+                        `;
+                    }
                 });
-                historyChart.update();
-                initScrollbarControls(); // Cập nhật lại thanh kéo slider
-            });
+            }
+            backtestDiv.innerHTML = backtestHtml || "<p style='color:var(--text-muted); font-size:12px;'>Chưa có dữ liệu đối chiếu.</p>";
+        })
+        .catch(err => console.error("❌ Lỗi load history_predictions.json:", err));
 
-            // Sự kiện nút Chọn lại tất cả các tỉnh
-            document.getElementById('btn-select-all').addEventListener('click', () => {
-                if (!historyChart) return;
-                historyChart.data.datasets.forEach((dataset, index) => {
-                    historyChart.show(index); // Sử dụng hàm hiện chuẩn của ChartJS API
-                });
-                historyChart.update();
-                initScrollbarControls(); // Cập nhật lại thanh kéo slider
-            });
-        }
+    // --- CÁC HÀM KHỞI TẠO BIỂU ĐỒ (GIỮ NGUYÊN NHƯ CŨ) ---
+    renderAdvanceChart('recent', data);
+    
+    document.getElementById('cbo-year').addEventListener('change', (e) => {
+        renderAdvanceChart(e.target.value, data);
+    });
+
+    // Sự kiện nút Bỏ chọn/Chọn tất cả
+    document.getElementById('btn-deselect-all').addEventListener('click', () => {
+        historyChart.data.datasets.forEach((_, i) => historyChart.hide(i));
+        historyChart.update();
+    });
+
+    document.getElementById('btn-select-all').addEventListener('click', () => {
+        historyChart.data.datasets.forEach((_, i) => historyChart.show(i));
+        historyChart.update();
+    });
+}
 
         function renderAdvanceChart(filterType, data) {
             let filteredLabels = [];
