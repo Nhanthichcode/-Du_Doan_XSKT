@@ -17,7 +17,7 @@ def crawl_missing_data():
         if os.path.exists(FILE_BO_SUNG):
             os.remove(FILE_BO_SUNG)
             print(f"🧹 Đã dọn dẹp trắng file {FILE_BO_SUNG} từ lần chạy trước.")
-
+            
         print("🔍 Đang phân tích dữ liệu cũ...")
         expected_dates = set(START_DATE_10_DAYS + timedelta(days=x) for x in range((END_DATE - START_DATE_10_DAYS).days + 1))
         existing_dates = set()
@@ -117,10 +117,12 @@ def crawl_missing_data():
             df_final = df_final[['Ngày', 'Đài', 'G.8']]
             df_final.to_csv(FILE_TONG_HOP, index=False, encoding='utf-8-sig')
 
-        print(json.dumps({"success": True, "has_new_data": True, "message": f"Đã cập nhật thêm {len(du_lieu_bo_sung)} bản ghi mới."}))
-    else:
-        # Nếu mảng du_lieu_bo_sung rỗng
-        print(json.dumps({"success": True, "has_new_data": False, "message": "Không có dữ liệu mới nào được tìm thấy."}))
+            print(json.dumps({"success": True, "has_new_data": True, "message": f"Đã cập nhật thêm {len(du_lieu_bo_sung)} bản ghi mới."}))
+        else:
+            # Nếu mảng du_lieu_bo_sung rỗng
+            print(json.dumps({"success": True, "has_new_data": False, "message": "Không có dữ liệu mới nào được tìm thấy."}))
+    except Exception as e:
+        print(json.dumps({"success": False, "error": str(e)}))
 
 if __name__ == "__main__":
     crawl_missing_data()
