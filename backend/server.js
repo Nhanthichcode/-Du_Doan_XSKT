@@ -224,9 +224,34 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-    logAction("======================================================================");
-    logAction(`🚀 [ONLINE] Node MLOps Backend đang kích hoạt tại Port ${PORT}`);
-    logAction("======================================================================");
-    await initPythonEnvironment();
-    //runDailyMLOpsPipeline();
+   try {
+        logAction("🔄 [AUTO-START] Hệ thống bắt đầu nạp cấu hình chạy thử nghiệm tự động...");
+        
+        // 1. Đồng bộ môi trường Python trước
+        await initPythonEnvironment();
+        
+        logAction("⚡ [AUTO-START] Kích hoạt riêng tiến trình cào dữ liệu ngầm (Test Crawl)...");
+        
+        // 2. Gọi tiến trình python3 chạy file cào dữ liệu độc lập
+        const autoCrawlProcess = spawn('python3', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
+        
+        let autoOutput = '';
+        let autoError = '';
+
+        autoCrawlProcess.stdout.on('data', (data) => { autoOutput += data.toString(); });
+        autoCrawlProcess.stderr.on('data', (data) => { autoError += data.toString(); });
+
+        autoCrawlProcess.on('close', (code) => {
+            if (code === 0) {
+                logAction("✅ [AUTO-START] Tiến trình cào tự động lúc khởi động đã hoàn tất thành công.");
+                logAction("📝 Hãy truy cập đường dẫn /logs để xem kết quả bóc tách văn bản!");
+            } else {
+                logAction(`❌ [AUTO-START] Tiến trình cào tự động thất bại với mã thoát: ${code}`);
+                logAction(`❌ Chi tiết lỗi Python: ${autoError}`);
+            }
+        });
+
+    } catch (startErr) {
+        logAction(`💥 [AUTO-START] Không thể khởi chạy tiến trình kiểm tra tự động: ${startErr.message}`);
+    }
 });
