@@ -263,77 +263,11 @@
             </main>
         </div>
     </div>
-
-    <!-- LOGIC BẢO MẬT & TẢI DỮ LIỆU ĐỘNG -->
-    <script>
-     const BACKEND_URL = 'https://du-doan-xskt.onrender.com';
-
-document.getElementById('btn-login').addEventListener('click', checkLogin);
-document.getElementById('auth-password').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') checkLogin();
-});
-
-
-       async function checkLogin() {
-    const inputPass = document.getElementById('auth-password').value;
-    const errorMsg = document.getElementById('login-error');
+<script src="js/dashboard_data.js"></script>
+    <script src="js/app.js"></script>
+  
+        
+      
     
-    try {
-        errorMsg.style.display = 'none';
-        errorMsg.style.color = '#eab308'; // Màu vàng cảnh báo
-        errorMsg.textContent = "Đang xác thực...";
-        errorMsg.style.display = 'block';
-
-        const response = await fetch(`${BACKEND_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: inputPass })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('main-app-wrapper').style.display = 'block';
-            
-            // ÉP TRÌNH DUYỆT BỎ CACHE BẰNG CÁCH THÊM DẤU THỜI GIAN
-            const noCache = new Date().getTime(); 
-
-            // TẢI FILE DỮ LIỆU
-            const dataScript = document.createElement('script');
-            dataScript.src = `js/dashboard_data.js?v=${noCache}`;
-            document.body.appendChild(dataScript);
-
-            dataScript.onload = () => {
-                console.log("✅ Đã nạp thành công file dữ liệu 20 năm.");
-                
-                // TẢI FILE LOGIC ĐỒ HỌA
-                const appScript = document.createElement('script');
-                appScript.src = `js/app.js?v=${noCache}`;
-                document.body.appendChild(appScript);
-
-                appScript.onload = () => console.log("✅ Đã khởi chạy app.js");
-                
-                appScript.onerror = () => {
-                    alert("❌ LỖI HIỂN THỊ: Không tìm thấy file js/app.js trên thư mục GitHub của bạn.");
-                };
-            };
-
-            dataScript.onerror = () => {
-                alert("❌ LỖI NGHIÊM TRỌNG: Không thể tải file js/dashboard_data.js!\n\nKhả năng cao là bạn vẫn đang chặn file này trong tệp .gitignore nên nó chưa được đẩy lên GitHub Pages.");
-            };
-
-        } else {
-            errorMsg.style.color = '#ef4444';
-            errorMsg.textContent = data.message || "Mật khẩu không chính xác!";
-            errorMsg.style.display = 'block';
-        }
-    } catch (error) {
-        errorMsg.style.color = '#ef4444';
-        errorMsg.textContent = "Không thể kết nối đến máy chủ xác thực Render!";
-        errorMsg.style.display = 'block';
-    }
-}
-    </script>
 </body>
 </html>
