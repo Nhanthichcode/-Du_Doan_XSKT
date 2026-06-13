@@ -190,6 +190,35 @@ app.get('/logs', (req, res) => {
     `);
 });
 
+// API CHẠY DUY NHẤT TIẾN TRÌNH CÀO DỮ LIỆU ĐỂ KIỂM TRA LOG
+app.get('/crawl', apiLimiter, (req, res) => {
+    logAction("⚡ Nhận lệnh kích hoạt RIÊNG TIẾN TRÌNH CÀO TỰ ĐỘNG thông qua đường dẫn /crawl");
+    
+    // Gọi riêng file cao_du_lieu_tu_dong.py, không chạy các bước AI phía sau
+    const pythonProcess = spawn('python', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
+    
+    let output = '';
+    let error = '';
+
+    pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
+    pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
+
+    pythonProcess.on('close', (code) => {
+        if (code === 0) {
+            res.json({ 
+                success: true, 
+                message: "Tiến trình cào đã chạy xong ngầm. Bạn hãy vào kiểm tra file /logs để xem kết quả chi tiết." 
+            });
+        } else {
+            res.status(500).json({ 
+                success: false, 
+                error: "Tiến trình Python bị văng lỗi hệ thống.", 
+                details: error 
+            });
+        }
+    });
+});
+
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 const PORT = process.env.PORT || 5000;
@@ -197,6 +226,6 @@ app.listen(PORT, async () => {
     logAction("======================================================================");
     logAction(`🚀 [ONLINE] Node MLOps Backend đang kích hoạt tại Port ${PORT}`);
     logAction("======================================================================");
-    await initPythonEnvironment();
-    runDailyMLOpsPipeline();
+    //await initPythonEnvironment();
+    //runDailyMLOpsPipeline();
 });
