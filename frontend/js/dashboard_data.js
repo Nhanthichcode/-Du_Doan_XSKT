@@ -1,5 +1,5 @@
 const xoso_data = {
-  "build_time": "12/06/2026 15:27:46",
+  "build_time": "13/06/2026 12:23:54",
   "timeline_x": [
     "01/05/2006",
     "02/05/2006",
@@ -7125,7 +7125,11 @@ const xoso_data = {
     "06/06/2026",
     "07/06/2026",
     "08/06/2026",
-    "09/06/2026"
+    "09/06/2026",
+    "10/06/2026",
+    "11/06/2026",
+    "12/06/2026",
+    "13/06/2026"
   ],
   "lines_y": {
     "Cà Mau": [
@@ -14253,6 +14257,10 @@ const xoso_data = {
       null,
       null,
       75,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "Hồ Chí Minh": [
@@ -21380,7 +21388,11 @@ const xoso_data = {
       95,
       null,
       75,
-      null
+      null,
+      null,
+      null,
+      null,
+      74
     ],
     "Đồng Tháp": [
       23,
@@ -28507,6 +28519,10 @@ const xoso_data = {
       null,
       null,
       93,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "Bạc Liêu": [
@@ -35634,7 +35650,11 @@ const xoso_data = {
       null,
       null,
       null,
-      6
+      6,
+      null,
+      null,
+      null,
+      null
     ],
     "Bến Tre": [
       null,
@@ -42761,7 +42781,11 @@ const xoso_data = {
       null,
       null,
       null,
-      47
+      47,
+      null,
+      null,
+      null,
+      null
     ],
     "Vũng Tàu": [
       null,
@@ -49888,7 +49912,11 @@ const xoso_data = {
       null,
       null,
       null,
-      8
+      8,
+      null,
+      null,
+      null,
+      null
     ],
     "Cần Thơ": [
       null,
@@ -57013,6 +57041,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      63,
       null,
       null,
       null
@@ -64142,6 +64174,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      54,
+      null,
+      null,
       null
     ],
     "Đồng Nai": [
@@ -71267,6 +71303,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      33,
       null,
       null,
       null
@@ -78396,6 +78436,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      27,
+      null,
       null
     ],
     "An Giang": [
@@ -85522,6 +85566,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      43,
       null,
       null
     ],
@@ -92650,6 +92698,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      88,
+      null,
       null
     ],
     "Bình Dương": [
@@ -99777,6 +99829,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      83,
       null
     ],
     "Trà Vinh": [
@@ -106904,6 +106960,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      46,
       null
     ],
     "Vĩnh Long": [
@@ -114031,6 +114091,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      90,
       null
     ],
     "Long An": [
@@ -121158,7 +121222,11 @@ const xoso_data = {
       6,
       null,
       null,
-      null
+      null,
+      null,
+      null,
+      null,
+      31
     ],
     "Bình Phước": [
       null,
@@ -128285,7 +128353,11 @@ const xoso_data = {
       97,
       null,
       null,
-      null
+      null,
+      null,
+      null,
+      null,
+      72
     ],
     "Hậu Giang": [
       null,
@@ -135412,7 +135484,11 @@ const xoso_data = {
       42,
       null,
       null,
-      null
+      null,
+      null,
+      null,
+      null,
+      93
     ],
     "Đà Lạt": [
       null,
@@ -142538,6 +142614,10 @@ const xoso_data = {
       null,
       null,
       68,
+      null,
+      null,
+      null,
+      null,
       null,
       null
     ],
@@ -149666,6 +149746,10 @@ const xoso_data = {
       null,
       89,
       null,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "Kiên Giang": [
@@ -156793,58 +156877,79 @@ const xoso_data = {
       null,
       86,
       null,
+      null,
+      null,
+      null,
+      null,
       null
     ]
   },
   "top_3_today": [
     {
-      "dai": "Bến Tre",
+      "dai": "Long An",
       "predictions": [
         {
-          "so": "67",
-          "xac_suat": 72.4
+          "so": "74",
+          "xac_suat": 55.04
         },
         {
-          "so": "55",
-          "xac_suat": 58.1
+          "so": "87",
+          "xac_suat": 54.78
         },
         {
-          "so": "55",
-          "xac_suat": 44.9
+          "so": "77",
+          "xac_suat": 54.76
         }
       ]
     },
     {
-      "dai": "Bạc Liêu",
+      "dai": "Hồ Chí Minh",
       "predictions": [
         {
-          "so": "44",
-          "xac_suat": 72.4
+          "so": "14",
+          "xac_suat": 54.84
         },
         {
-          "so": "30",
-          "xac_suat": 58.1
+          "so": "91",
+          "xac_suat": 54.65
         },
         {
-          "so": "06",
-          "xac_suat": 44.9
+          "so": "52",
+          "xac_suat": 54.56
         }
       ]
     },
     {
-      "dai": "Vũng Tàu",
+      "dai": "Hậu Giang",
       "predictions": [
         {
-          "so": "73",
-          "xac_suat": 72.4
+          "so": "28",
+          "xac_suat": 54.9
         },
         {
-          "so": "54",
-          "xac_suat": 58.1
+          "so": "81",
+          "xac_suat": 54.88
         },
         {
-          "so": "46",
-          "xac_suat": 44.9
+          "so": "17",
+          "xac_suat": 54.78
+        }
+      ]
+    },
+    {
+      "dai": "Bình Phước",
+      "predictions": [
+        {
+          "so": "15",
+          "xac_suat": 56.16
+        },
+        {
+          "so": "24",
+          "xac_suat": 55.13
+        },
+        {
+          "so": "50",
+          "xac_suat": 54.29
         }
       ]
     }

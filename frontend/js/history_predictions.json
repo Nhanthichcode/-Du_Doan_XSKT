@@ -104,5 +104,75 @@
         }
       ]
     }
+  ],
+  "13/06/2026": [
+    {
+      "dai": "Long An",
+      "predictions": [
+        {
+          "so": "74",
+          "xac_suat": 55.04
+        },
+        {
+          "so": "87",
+          "xac_suat": 54.78
+        },
+        {
+          "so": "77",
+          "xac_suat": 54.76
+        }
+      ]
+    },
+    {
+      "dai": "Hồ Chí Minh",
+      "predictions": [
+        {
+          "so": "14",
+          "xac_suat": 54.84
+        },
+        {
+          "so": "91",
+          "xac_suat": 54.65
+        },
+        {
+          "so": "52",
+          "xac_suat": 54.56
+        }
+      ]
+    },
+    {
+      "dai": "Hậu Giang",
+      "predictions": [
+        {
+          "so": "28",
+          "xac_suat": 54.9
+        },
+        {
+          "so": "81",
+          "xac_suat": 54.88
+        },
+        {
+          "so": "17",
+          "xac_suat": 54.78
+        }
+      ]
+    },
+    {
+      "dai": "Bình Phước",
+      "predictions": [
+        {
+          "so": "15",
+          "xac_suat": 56.16
+        },
+        {
+          "so": "24",
+          "xac_suat": 55.13
+        },
+        {
+          "so": "50",
+          "xac_suat": 54.29
+        }
+      ]
+    }
   ]
 }
