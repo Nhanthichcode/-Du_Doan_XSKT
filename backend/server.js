@@ -179,27 +179,58 @@ app.get('/ping', apiLimiter, verifySecretKey, (req, res) => {
     runDailyMLOpsPipeline();
 });
 
-app.get('/logs', (req, res) => {
+const logLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // Khung thời gian: 1 phút
+    max: 45, // Tối đa 45 lần gọi/IP trong 1 phút (2 giây/lần = 30 lần, dư 15 lần để mở tab mới)
+    statusCode: 429,
+    message: "Bạn đang tải lại nhật ký quá nhanh. Vui lòng đợi vài giây.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.get('/logs', logLimiter, (req, res) => {
     const logFilePath = path.join(__dirname, 'system_log.txt');
     if (req.query.raw === 'true') {
-        if (fs.existsSync(logFilePath)) { res.setHeader('Content-Type', 'text/plain; charset=utf-8'); return res.sendFile(logFilePath); }
+        if (fs.existsSync(logFilePath)) { 
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8'); 
+            return res.sendFile(logFilePath); 
+        }
         return res.status(404).send("Chưa có log.");
     }
     res.send(`
         <!DOCTYPE html>
         <html>
-        <head><meta charset="UTF-8"><title>Hệ Thống Giám Sát Log MLOps</title><style>body { background-color: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 20px; } pre { background: #252526; padding: 15px; border-radius: 5px; height: calc(100vh - 120px); overflow-y: auto; }</style></head>
+        <head>
+            <meta charset="UTF-8">
+            <title>Hệ Thống Giám Sát Log MLOps</title>
+            <style>
+                body { background-color: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 20px; margin: 0; } 
+                h2 { margin-bottom: 10px; color: #569cd6; }
+                pre { background: #252526; padding: 15px; border-radius: 5px; height: calc(100vh - 100px); overflow-y: auto; box-sizing: border-box; margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+            </style>
+        </head>
         <body>
-            <h2>Nhật Ký Hệ Thống MLOps Live (Chống Phình To Tự Động)</h2>
+            <h2>Nhật Ký Hệ Thống MLOps Live</h2>
             <pre id="log-content">Đang nạp nhật ký hành động...</pre>
             <script>
                 async function fetchNewLogs() {
                     try {
                         const r = await fetch('/logs?raw=true');
-                        if (r.ok) { const t = await r.text(); const b = document.getElementById('log-content'); if(b.innerText !== t.trim()){ b.innerText = t.trim(); b.scrollTop = b.scrollHeight; } }
+                        if (r.ok) { 
+                            const t = await r.text(); 
+                            const b = document.getElementById('log-content');                             
+                            if (b.innerText !== t.trim()) {                                
+                                const isAtBottom = (b.scrollHeight - b.scrollTop - b.clientHeight) < 50;                                
+                                b.innerText = t.trim();                                                                 
+                                if (isAtBottom) {
+                                    b.scrollTop = b.scrollHeight; 
+                                }
+                            } 
+                        }
                     } catch (e) {}
-                }
-                setInterval(fetchNewLogs, 2000); fetchNewLogs();
+                }                
+                setInterval(fetchNewLogs, 3000); 
+                fetchNewLogs();
             </script>
         </body>
         </html>
