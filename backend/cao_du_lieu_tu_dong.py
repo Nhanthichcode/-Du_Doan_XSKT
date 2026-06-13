@@ -14,6 +14,14 @@ VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 TODAY = datetime.now(VN_TZ).date()
 EXPECTED_DATES = {TODAY - timedelta(days=i) for i in range(10)}
 
+# Danh sách chuẩn tên 21 đài Miền Nam để quét Text trực tiếp
+MỞ_THƯỞNG_XSMN = [
+    "TP.HCM", "Hồ Chí Minh", "Đồng Tháp", "Cà Mau", "Bến Tre", "Vũng Tàu", "Bạc Liêu",
+    "Đồng Nai", "Cần Thơ", "Sóc Trăng", "Tây Ninh", "An Giang", "Bình Thuận",
+    "Vĩnh Long", "Bình Dương", "Trà Vinh", "Long An", "Bình Phước", "Hậu Giang",
+    "Tiền Giang", "Kiên Giang", "Đà Lạt"
+]
+
 def log_action(message):
     timestamp = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     with open(LOG_FILE, 'a', encoding='utf-8') as f:
@@ -21,7 +29,7 @@ def log_action(message):
     print(message, flush=True)
 
 def crawl_missing_data():
-    log_action("============ KÍCH HOẠT NGUỒN DỰ PHÒNG TOÀN DIỆN (ĐẠI PHÁT) ============")
+    log_action("============ KÍCH HOẠT QUÉT PLAIN-TEXT ĐẠI PHÁT ============")
     existing_dates = set()
     if os.path.exists(FILE_TONG_HOP):
         try:
@@ -35,7 +43,6 @@ def crawl_missing_data():
         log_action("📝 Không thiếu ngày nào trong chu kỳ 10 ngày.")
         return
 
-    # Sử dụng Header chuẩn sạch để tránh bị chặn
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
@@ -43,48 +50,54 @@ def crawl_missing_data():
 
     for current_date in missing_dates:
         date_str = current_date.strftime("%d-%m-%Y")
-        
-        # CHUYỂN SANG NGUỒN DỰ PHÒNG XOSODAIPHAT
         url = f"https://xosodaiphat.com/xsmn-{date_str}.html"
         
-        log_action(f"🌐 Đang cào nguồn dự phòng: {url}")
+        log_action(f"🌐 Đang quét Text từ: {url}")
         try:
             resp = requests.get(url, headers=headers, timeout=10)
-            if resp.status_code != 200:
-                log_action(f"❌ Nguồn dự phòng phản hồi HTTP: {resp.status_code}")
-                continue
+            if resp.status_code != 200: continue
             
-            # Cấu trúc Đại Phát cực kỳ sạch, giải 8 nằm trong thẻ có class="g8" hoặc id rõ ràng
-            # Bóc tách tên đài mở thưởng
-            tieu_de_dai = re.findall(r'class="tinh"[^>]*>([^<]+)', resp.text)
-            if not tieu_de_dai:
-                tieu_de_dai = re.findall(r'title="Xổ số([^"]+)" class="title-provice"', resp.text)
+            # Làm sạch mã HTML, xóa khoảng trắng thừa để đưa về chuỗi text liên tục
+            html_clean = re.sub(r'\s+', ' ', resp.text)
             
-            # Bóc tách số giải 8 (đặc trưng chứa chuỗi số 2 chữ số trong class="prize-8")
-            matches = re.findall(r'class="v-g8[^>]*>(\d+)', resp.text) or re.findall(r'class="txt-g8"[^>]*>(\d+)', resp.text)
+            # Tìm kiếm khối chứa bảng kết quả của từng tỉnh mở thưởng trong ngày
+            # Cấu trúc chung của các trang xổ số luôn là: [Tên Tỉnh] ... [Giải 8] ... [Số trúng]
+            day_data = []
             
-            # Quét bao vây dự phòng nếu cấu trúc class thay đổi
-            if not matches:
-                matches = re.findall(r'<td[^>]*class="[^"]*g8[^"]*"[^>]*>(\d+)', resp.text)
-
-            log_action(f"🔍 [DỰ PHÒNG] Tìm thấy đài: {tieu_de_dai}")
-            log_action(f"🔍 [DỰ PHÒNG] Tìm thấy G8: {matches}")
-
-            if matches and tieu_de_dai:
-                for i, dai in enumerate(tieu_de_dai):
-                    if i < len(matches):
-                        # Chuẩn hóa tên đài về dạng chữ gọn để khớp biểu đồ của bạn
-                        ten_dai_sach = dai.replace("Xổ Số", "").replace("XS", "").strip()
-                        all_new_data.append({
+            for tinh in MỞ_THƯỞNG_XSMN:
+                # Nếu tìm thấy tên tỉnh xuất hiện trong mã nguồn
+                if tinh in html_clean:
+                    # Cắt một đoạn text ngắn dài 1500 ký tự ngay sau tên tỉnh đó để dò riêng giải 8 của đài này
+                    tinh_pos = html_clean.find(tinh)
+                    sub_text = html_clean[tinh_pos:tinh_pos+1500]
+                    
+                    # Giải 8 là giải đầu tiên xuất hiện hoặc nằm gần nhất với từ khóa prize-8 / v-g8 / g8
+                    # Tìm cụm số có đúng 2 chữ số nằm trong thẻ chứa thông tin giải 8
+                    g8_match = re.search(r'(?:g8|prize-8|v-g8)[^>]*>.*?(\d{2})</', sub_text, re.IGNORECASE)
+                    
+                    # Phương án quét phụ: nếu không thấy class, bốc thẳng cụm 2 số đầu tiên nằm trong thẻ td/span sau chữ Giải 8
+                    if not g8_match:
+                        g8_match = re.search(r'(?:Giải 8|G8).*?>.*?(\d{2})</', sub_text, re.IGNORECASE)
+                        
+                    if g8_match:
+                        so_g8 = g8_match.group(1)
+                        # Chuẩn hóa tên đài HCM về đúng định dạng gốc của bạn
+                        ten_dai = "Hồ Chí Minh" if tinh in ["TP.HCM", "Hồ Chí Minh"] else tinh
+                        
+                        day_data.append({
                             "Ngày": current_date.strftime("%d/%m/%Y"),
-                            "Đài": ten_dai_sach,
-                            "G.8": str(matches[i])
+                            "Đài": ten_dai,
+                            "G.8": so_g8
                         })
+            
+            if day_data:
+                log_action(f"✅ Ngày {date_str} bóc trần được {len(day_data)} đài: {[x['Đài']+':'+x['G.8'] for x in day_data]}")
+                all_new_data.extend(day_data)
             else:
-                log_action(f"⚠️ Không khớp được dữ liệu Regex tại nguồn dự phòng ngày {date_str}")
+                log_action(f"⚠️ Không tìm thấy từ khóa xổ số hợp lệ cho ngày {date_str}")
                 
         except Exception as e:
-            log_action(f"❌ Lỗi kết nối nguồn dự phòng: {e}")
+            log_action(f"❌ Lỗi xử lý text ngày {date_str}: {e}")
 
     if all_new_data:
         df_new = pd.DataFrame(all_new_data)
@@ -94,9 +107,9 @@ def crawl_missing_data():
         else:
             df_final = df_new
         df_final.to_csv(FILE_TONG_HOP, index=False, encoding="utf-8-sig")
-        log_action(f"🎉 KHÔI PHỤC THÀNH CÔNG: Đã nạp {len(all_new_data)} dòng dữ liệu từ nguồn dự phòng vào CSV!")
+        log_action(f"🎉 HOÀN THÀNH: Đã ép nạp {len(all_new_data)} dòng dữ liệu giải 8 mới vào CSV!")
     else:
-        log_action("❌ Tất cả các nguồn đều thất bại do lỗi hệ thống mạng bên ngoài.")
+        log_action("❌ Thất bại hoàn toàn: Phương pháp bóc tách chuỗi text trần vẫn không tìm thấy kết quả.")
 
 if __name__ == "__main__":
     crawl_missing_data()
