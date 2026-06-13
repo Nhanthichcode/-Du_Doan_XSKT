@@ -1,9 +1,12 @@
+// Các biến quản lý dữ liệu toàn cục (Đọc từ dữ liệu thật)
 let allHistoricalRecords = [];
 let predictionsData = [];
 let backtestData = [];
 
+// Các đài miền Nam cố định
 const DAIS_MIENNAM = ["Tiền Giang", "Kiên Giang", "Đà Lạt", "TP.HCM", "Tây Ninh", "An Giang", "Cần Thơ", "Vũng Tàu", "Bến Tre", "Đồng Nai", "Bạc Liêu", "Cà Mau", "Đồng Tháp", "Sóc Trăng", "Bình Dương", "Trà Vinh", "Vĩnh Long", "Bình Phước", "Hậu Giang", "Long An"];
 
+// Thiết lập bảng
 let chartInstance = null;
 let tableCurrentPage = 1;
 const tablePageSize = 10;
@@ -11,8 +14,9 @@ let filteredTableData = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     initApp();
-    loadRealData();
+    loadRealData(); // Hàm lõi thay thế cho dữ liệu giả trước đây
 
+    // Sự kiện Sidebar
     const btnToggle = document.getElementById("btn-toggle-sidebar");
     const appContainer = document.getElementById("app-container");
     btnToggle.addEventListener("click", () => {
@@ -20,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { if (chartInstance) chartInstance.resize(); }, 300);
     });
 
+    // Các sự kiện UI Biểu đồ & Bảng
     document.getElementById("cbo-timeframe").addEventListener("change", (e) => renderChart(e.target.value));
     
     const searchInput = document.getElementById("table-search-input");
@@ -53,14 +58,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-pan-left").addEventListener("click", () => panChart(-0.2));
     document.getElementById("btn-pan-right").addEventListener("click", () => panChart(0.2));
 
+    // Xử lý nút Trigger API thực tế
     const btnTrigger = document.getElementById("btn-trigger-pipeline");
     btnTrigger.addEventListener("click", async () => {
         btnTrigger.disabled = true;
         btnTrigger.innerHTML = `Đang chạy quy trình AI...`;
-        appendTerminalLog("[SYSTEM] Kích hoạt tiến trình phân tích tự động từ giao diện...", "log-warn");
+        appendTerminalLog("[SYSTEM] Kích hoạt tiến trình phân tích từ giao diện...", "log-warn");
         
         try {
-            const res = await fetch('https://du-doan-xskt.onrender.com/ping');
+            // Cố gắng gọi API Ping đến server nội bộ
+            const res = await fetch('/ping');
             if (res.ok) {
                 const data = await res.json();
                 appendTerminalLog(`[SUCCESS] ${data.message || 'Lệnh kích hoạt thành công.'}`, "log-success");
@@ -68,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 appendTerminalLog("[WARNING] Máy chủ phản hồi trạng thái không hợp lệ.", "log-warn");
             }
         } catch (e) {
-            appendTerminalLog("[ERROR] Không thể kết nối tới API.", "log-danger");
+            appendTerminalLog("[ERROR] Không thể kết nối trực tiếp đến backend (API).", "log-danger");
         }
 
         setTimeout(() => {
@@ -77,8 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     });
 
+    // Định kỳ lấy log từ server
     fetchSystemLog();
-    setInterval(fetchSystemLog, 15000);
+    setInterval(fetchSystemLog, 15000); // 15 giây lấy log 1 lần
 });
 
 function initApp() {
@@ -86,7 +94,11 @@ function initApp() {
     document.getElementById("lbl-time").textContent = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
 }
 
+// ---------------------------------------------------------
+// MODULE ĐỌC DỮ LIỆU THẬT TỪ HỆ THỐNG
+// ---------------------------------------------------------
 async function loadRealData() {
+    // 1. Quét dữ liệu CSV đã đóng gói trong window.dashboardData (từ dashboard_data.js)
     const rawData = window.dashboardData || window.xsmnData || [];
     
     allHistoricalRecords = rawData.map(item => {
@@ -100,7 +112,7 @@ async function loadRealData() {
         
         if (dateStr.includes('-')) {
             const parts = dateStr.split('-');
-            if (parts[2] && parts[2].length === 4) {
+            if (parts[2] && parts[2].length === 4) { // dd-mm-yyyy
                 year = parseInt(parts[2]);
                 parsedDate = new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
             }
@@ -111,6 +123,7 @@ async function loadRealData() {
 
     filteredTableData = [...allHistoricalRecords];
 
+    // 2. Tải tệp history_predictions.json (Dự báo số vàng và đối chiếu)
     try {
         const res = await fetch('js/history_predictions.json');
         if (res.ok) {
@@ -123,19 +136,22 @@ async function loadRealData() {
             }
         }
     } catch (e) {
-        console.warn("Chưa tìm thấy tệp predictions.");
+        console.warn("Chưa tìm thấy tệp history_predictions.json, sử dụng fallback an toàn.");
     }
 
+    // Nếu không có mảng predictions, thử tìm trong dashboardData 
     if (predictionsData.length === 0 && window.dashboardPredictions) {
         predictionsData = window.dashboardPredictions;
     }
 
+    // 3. Tiến hành vẽ giao diện bằng dữ liệu thật
     renderPredictionsUI();
     renderBacktestUI();
     renderChart("recent");
     renderHistoricalTable();
 }
 
+// Hàm kết xuất Số Vàng động
 function renderPredictionsUI() {
     const list = document.getElementById("prediction-list");
     list.innerHTML = "";
@@ -179,6 +195,7 @@ function renderPredictionsUI() {
     });
 }
 
+// Hàm kết xuất Đối chiếu động
 function renderBacktestUI() {
     const list = document.getElementById("backtest-list");
     list.innerHTML = "";
@@ -226,20 +243,26 @@ function renderBacktestUI() {
     });
 }
 
+// ---------------------------------------------------------
+// ĐỌC LOG THẬT TỪ SYSTEM_LOG.TXT
+// ---------------------------------------------------------
 async function fetchSystemLog() {
     try {
-        const res = await fetch('https://du-doan-xskt.onrender.com/api/system-log');
+        const res = await fetch('../system_log.txt');
         if (res.ok) {
             const text = await res.text();
             const logs = text.split('\n').filter(l => l.trim() !== '');
             const termLogs = document.getElementById("terminal-logs");
             termLogs.innerHTML = '';
             
+            // Chỉ lấy 50 dòng cuối cùng để tránh quá tải
             logs.slice(-50).forEach(log => {
                 let typeClass = "log-info";
-                if (log.includes("THANH CONG")) typeClass = "log-success";
-                if (log.includes("THAT BAI") || log.includes("LOI")) typeClass = "log-danger";
+                if (log.includes("THÀNH CÔNG")) typeClass = "log-success";
+                if (log.includes("THẤT BẠI") || log.includes("LỖI") || log.includes("❌")) typeClass = "log-danger";
+                if (log.includes("WARNING") || log.includes("CẢNH BÁO")) typeClass = "log-warn";
                 
+                // Loại bỏ emoji theo yêu cầu
                 const cleanLog = log.replace(/[✅❌⚠️⏰🛠️🤖🚀🔮✉️✈️🎉]/g, '').trim();
 
                 const div = document.createElement("div");
@@ -249,7 +272,9 @@ async function fetchSystemLog() {
             });
             termLogs.scrollTop = termLogs.scrollHeight;
         }
-    } catch(e) {}
+    } catch(e) {
+        // Im lặng nếu chưa có log
+    }
 }
 
 function appendTerminalLog(msg, typeClass = "log-info") {
@@ -264,6 +289,9 @@ function appendTerminalLog(msg, typeClass = "log-info") {
     termLogs.scrollTop = termLogs.scrollHeight;
 }
 
+// ---------------------------------------------------------
+// QUẢN LÝ BIỂU ĐỒ CHART.JS
+// ---------------------------------------------------------
 function renderChart(timeframe) {
     if (allHistoricalRecords.length === 0) return;
 
@@ -273,6 +301,7 @@ function renderChart(timeframe) {
     const isSpecificYear = !["recent", "2years", "5years", "all"].includes(timeframe);
 
     if (timeframe === "recent") {
+        // Lấy 30 ngày cuối cùng có trong dữ liệu
         const maxDate = new Date(Math.max(...allHistoricalRecords.map(e => e.date)));
         const thirtyDaysAgo = new Date(maxDate);
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -308,7 +337,7 @@ function renderChart(timeframe) {
             pointRadius: timeframe === "recent" ? 4 : 1,
             pointHoverRadius: 6,
             spanGaps: true,
-            hidden: index >= 4
+            hidden: index >= 4 // Ẩn bớt để chống rối
         };
     });
 
@@ -368,12 +397,15 @@ function panChart(percentOffset) {
     }
 }
 
+// ---------------------------------------------------------
+// QUẢN LÝ BẢNG PHÂN TRANG
+// ---------------------------------------------------------
 function renderHistoricalTable() {
     const tableBody = document.getElementById("historical-table-rows");
     tableBody.innerHTML = "";
 
     if (filteredTableData.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Không tìm thấy dữ liệu.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">Không tìm thấy dữ liệu hoặc chưa được tải.</td></tr>`;
         document.getElementById("table-entries-info").textContent = "Không tìm thấy dữ liệu.";
         return;
     }
