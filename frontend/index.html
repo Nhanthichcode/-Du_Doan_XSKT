@@ -16,59 +16,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-
-    <style>
-        /* CSS cho màn hình đăng nhập bảo mật */
-        .login-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-app);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .login-box {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 2rem;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .login-box h2 { color: var(--primary); margin-bottom: 0.5rem; }
-        .login-box p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
-        .login-box input {
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            background-color: #0f172a;
-            border: 1px solid var(--border-color);
-            color: white;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-        .login-box input:focus { outline: none; border-color: var(--primary); }
-        .login-box button { width: 100%; padding: 0.75rem; font-size: 1rem; }
-        
-        /* Ẩn giao diện chính ban đầu */
-        #main-app-wrapper { display: none; }
-    </style>
 </head>
 <body>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP -->
-    <div id="login-overlay" class="login-overlay">
-        <div class="login-box">
-            <h2>Hệ Thống MLOps Nội Bộ</h2>
-            <p>Vui lòng nhập mật khẩu để truy cập dữ liệu quản trị.</p>
-            <input type="password" id="auth-password" placeholder="Nhập mật khẩu..." autocomplete="off" />
-            <button id="btn-login" class="btn btn-primary">Truy Cập</button>
-            <p id="login-error" class="text-danger" style="display:none; margin-top: 10px; font-size: 0.85rem;">Mật khẩu không chính xác!</p>
-        </div>
-    </div>
+  
 
     <!-- WRAPPER GIAO DIỆN CHÍNH (Sẽ hiện ra khi nhập đúng Pass) -->
     <div id="main-app-wrapper">
