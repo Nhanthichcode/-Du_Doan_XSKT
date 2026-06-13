@@ -195,7 +195,8 @@ app.get('/crawl', apiLimiter, (req, res) => {
     logAction("⚡ Nhận lệnh kích hoạt RIÊNG TIẾN TRÌNH CÀO TỰ ĐỘNG thông qua đường dẫn /crawl");
     
     // Gọi riêng file cao_du_lieu_tu_dong.py, không chạy các bước AI phía sau
-    const pythonProcess = spawn('python', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
+    //const pythonProcess = spawn('python', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
+    await initPythonEnvironment();
     
     let output = '';
     let error = '';
