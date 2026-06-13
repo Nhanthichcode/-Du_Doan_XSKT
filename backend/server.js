@@ -191,7 +191,7 @@ app.get('/logs', (req, res) => {
 });
 
 // API CHẠY DUY NHẤT TIẾN TRÌNH CÀO DỮ LIỆU ĐỂ KIỂM TRA LOG
-app.get('/crawl', apiLimiter, (req, res) => {
+app.get('/crawl', async(req, res) => {
     logAction("⚡ Nhận lệnh kích hoạt RIÊNG TIẾN TRÌNH CÀO TỰ ĐỘNG thông qua đường dẫn /crawl");
     
     // Gọi riêng file cao_du_lieu_tu_dong.py, không chạy các bước AI phía sau
