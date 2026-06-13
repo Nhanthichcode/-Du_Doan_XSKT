@@ -9,21 +9,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
-    <!-- Nhúng tệp CSS định dạng giao diện -->
-    <link rel="stylesheet" href="css/style.css">
+    <link class="css-st" rel="stylesheet" href="css/style.css">
     
-    <!-- Thư viện Chart.js và plugin zoom -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
+    <style>
+        /* Đảm bảo giao diện hiển thị ngay lập tức, không bị ẩn */
+        #main-app-wrapper { 
+            display: block !important; 
+        }
+        
+        /* Tối ưu hóa vùng hiển thị bảng dữ liệu trên thiết bị di động */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
 </head>
 <body>
 
-  
-
-    <!-- WRAPPER GIAO DIỆN CHÍNH (Sẽ hiện ra khi nhập đúng Pass) -->
     <div id="main-app-wrapper">
-        <!-- THANH ĐẦU TRANG -->
+        
         <header class="app-header">
             <div class="header-left">
                 <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Bảng thông tin">Menu</button>
@@ -37,10 +46,8 @@
             </div>
         </header>
 
-        <!-- BỐ CỤC CHÍNH -->
         <div id="app-container" class="app-layout">
             
-            <!-- THANH BÊN (DỰ ĐOÁN & BACKTEST) -->
             <aside class="app-sidebar">
                 
                 <div class="section-box">
@@ -65,10 +72,8 @@
 
             </aside>
 
-            <!-- KHU VỰC LÀM VIỆC CHÍNH -->
             <main class="app-main">
                 
-                <!-- BIỂU ĐỒ TRỰC QUAN -->
                 <div class="chart-box">
                     <div class="chart-header">
                         <h3 class="chart-title">Biểu Đồ Xu Hướng Giải 8 XSMN (Y: 00-99 Cố Định)</h3>
@@ -136,7 +141,6 @@
                     </div>
                 </div>
 
-                <!-- BẢNG DANH SÁCH LỊCH SỬ -->
                 <div class="history-list-box">
                     <div class="chart-header">
                         <h3 class="chart-title">Tra Cứu Danh Sách Toàn Bộ Dữ Liệu</h3>
@@ -187,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- BẢNG ĐIỀU KHIỂN & TERMINAL -->
                 <div class="terminal-box">
                     <div class="terminal-header">
                         <div class="terminal-dots">
@@ -214,11 +217,8 @@
             </main>
         </div>
     </div>
-<script src="js/dashboard_data.js"></script>
+
+    <script src="js/dashboard_data.js"></script>
     <script src="js/app.js"></script>
-  
-        
-      
-    
 </body>
 </html>
