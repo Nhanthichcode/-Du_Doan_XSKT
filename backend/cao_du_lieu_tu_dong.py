@@ -8,7 +8,6 @@ from zoneinfo import ZoneInfo
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_TONG_HOP = os.path.join(BASE_DIR, 'xsmn_tong_hop_20_nam.csv')
-FILE_BO_SUNG = os.path.join(BASE_DIR, 'xsmn_bosung.csv')
 LOG_FILE = os.path.join(BASE_DIR, 'system_log.txt')
 
 VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
@@ -17,32 +16,26 @@ EXPECTED_DATES = {TODAY - timedelta(days=i) for i in range(10)}
 
 def log_action(message):
     timestamp = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-    try:
-        with open(LOG_FILE, 'a', encoding='utf-8') as f:
-            f.write(f"[{timestamp}] [PYTHON - cao_du_lieu] {message}\n")
-        print(message, flush=True)
-    except Exception as e:
-        print(f"Lỗi ghi file log: {e}", flush=True)
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(f"[{timestamp}] [PYTHON - cao_du_lieu] {message}\n")
+    print(message, flush=True)
 
 def crawl_missing_data():
-    log_action("============ KHỞI CHẠY KIỂM TRA ĐỘC LẬP ============")
+    log_action("============ KÍCH HOẠT NGUỒN DỰ PHÒNG TOÀN DIỆN (ĐẠI PHÁT) ============")
     existing_dates = set()
     if os.path.exists(FILE_TONG_HOP):
         try:
             df_existing = pd.read_csv(FILE_TONG_HOP, names=['Ngày', 'Đài', 'G.8'], header=0)
             existing_dates = set(pd.to_datetime(df_existing["Ngày"], dayfirst=True, errors='coerce').dropna().dt.date)
-        except Exception as e:
-            log_action(f"⚠️ Không đọc được ngày từ file tổng hợp (Có thể do file rỗng): {e}")
+        except:
+            pass
 
     missing_dates = sorted(EXPECTED_DATES - existing_dates)
-    
-    # Nếu file CSV đang rỗng, ép buộc cào thử nghiệm ngày hôm nay và hôm qua để kiểm tra
     if not missing_dates:
-        log_action("📝 Không thấy ngày thiếu trong 10 ngày qua, ép buộc cào thử nghiệm 2 ngày gần nhất...")
-        missing_dates = [TODAY - timedelta(days=1), TODAY]
+        log_action("📝 Không thiếu ngày nào trong chu kỳ 10 ngày.")
+        return
 
-    log_action(f"📡 Danh sách ngày thực hiện quét: {[d.strftime('%d-%m-%Y') for d in missing_dates]}")
-
+    # Sử dụng Header chuẩn sạch để tránh bị chặn
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
@@ -50,40 +43,48 @@ def crawl_missing_data():
 
     for current_date in missing_dates:
         date_str = current_date.strftime("%d-%m-%Y")
-        url = f"https://www.minhngoc.com.vn/ket-qua-xo-so/mien-nam/{date_str}.html"
         
-        log_action(f"🌐 Đang kết nối: {url}")
+        # CHUYỂN SANG NGUỒN DỰ PHÒNG XOSODAIPHAT
+        url = f"https://xosodaiphat.com/xsmn-{date_str}.html"
+        
+        log_action(f"🌐 Đang cào nguồn dự phòng: {url}")
         try:
             resp = requests.get(url, headers=headers, timeout=10)
-            log_action(f"➔ Kết quả HTTP Status: {resp.status_code}")
-            
-            if resp.status_code != 200: 
+            if resp.status_code != 200:
+                log_action(f"❌ Nguồn dự phòng phản hồi HTTP: {resp.status_code}")
                 continue
             
-            # 🔍 IN CHI TIẾT KẾT QUẢ MÃ NGUỒN HTML TÌM ĐƯỢC RA LOG FILE
-            matches = re.findall(r'class="G8"[^>]*>(\d+)', resp.text)
-            tieu_de_dai = re.findall(r'th_tai_dai"[^>]*>([^<]+)', resp.text)
+            # Cấu trúc Đại Phát cực kỳ sạch, giải 8 nằm trong thẻ có class="g8" hoặc id rõ ràng
+            # Bóc tách tên đài mở thưởng
+            tieu_de_dai = re.findall(r'class="tinh"[^>]*>([^<]+)', resp.text)
+            if not tieu_de_dai:
+                tieu_de_dai = re.findall(r'title="Xổ số([^"]+)" class="title-provice"', resp.text)
             
-            log_action(f"🔍 [KẾT QUẢ REGEX {date_str}] - Tìm thấy class='G8': {matches}")
-            log_action(f"🔍 [KẾT QUẢ REGEX {date_str}] - Tìm thấy th_tai_dai: {tieu_de_dai}")
+            # Bóc tách số giải 8 (đặc trưng chứa chuỗi số 2 chữ số trong class="prize-8")
+            matches = re.findall(r'class="v-g8[^>]*>(\d+)', resp.text) or re.findall(r'class="txt-g8"[^>]*>(\d+)', resp.text)
+            
+            # Quét bao vây dự phòng nếu cấu trúc class thay đổi
+            if not matches:
+                matches = re.findall(r'<td[^>]*class="[^"]*g8[^"]*"[^>]*>(\d+)', resp.text)
+
+            log_action(f"🔍 [DỰ PHÒNG] Tìm thấy đài: {tieu_de_dai}")
+            log_action(f"🔍 [DỰ PHÒNG] Tìm thấy G8: {matches}")
 
             if matches and tieu_de_dai:
-                day_records = []
                 for i, dai in enumerate(tieu_de_dai):
                     if i < len(matches):
-                        record = {
-                            "Ngày": date_str,
-                            "Đài": dai.strip(),
-                            "G.8": matches[i]
-                        }
-                        all_new_data.append(record)
-                        day_records.append(f"{dai.strip()}:{matches[i]}")
-                log_action(f"✅ Chi tiết G.8 trích xuất được: {', '.join(day_records)}")
+                        # Chuẩn hóa tên đài về dạng chữ gọn để khớp biểu đồ của bạn
+                        ten_dai_sach = dai.replace("Xổ Số", "").replace("XS", "").strip()
+                        all_new_data.append({
+                            "Ngày": current_date.strftime("%d/%m/%Y"),
+                            "Đài": ten_dai_sach,
+                            "G.8": str(matches[i])
+                        })
             else:
-                log_action(f"❌ Thất bại: Regex không khớp dữ liệu (Mã HTML trang đích có thể đã chặn bot hoặc rỗng)")
+                log_action(f"⚠️ Không khớp được dữ liệu Regex tại nguồn dự phòng ngày {date_str}")
                 
         except Exception as e:
-            log_action(f"❌ Sự cố kết nối ngày {date_str}: {e}")
+            log_action(f"❌ Lỗi kết nối nguồn dự phòng: {e}")
 
     if all_new_data:
         df_new = pd.DataFrame(all_new_data)
@@ -93,9 +94,9 @@ def crawl_missing_data():
         else:
             df_final = df_new
         df_final.to_csv(FILE_TONG_HOP, index=False, encoding="utf-8-sig")
-        log_action(f"🎉 Đã lưu trực tiếp {len(all_new_data)} dòng dữ liệu mới vào file CSV!")
+        log_action(f"🎉 KHÔI PHỤC THÀNH CÔNG: Đã nạp {len(all_new_data)} dòng dữ liệu từ nguồn dự phòng vào CSV!")
     else:
-        log_action("⚠️ Kết thúc chu kỳ thử nghiệm: Không có dữ liệu mới nào được lưu.")
+        log_action("❌ Tất cả các nguồn đều thất bại do lỗi hệ thống mạng bên ngoài.")
 
 if __name__ == "__main__":
     crawl_missing_data()
