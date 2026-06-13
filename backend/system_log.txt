@@ -652,3 +652,24 @@ Feature names seen at fit time, yet now missing:
 [12/06/2026 15:27:33] [PYTHON - build_data] Bắt đầu đóng gói dữ liệu tĩnh JS...
 [12/06/2026 15:27:46] [PYTHON - build_data] 🎉 Đã tạo thành công file tĩnh tại: /opt/render/project/src/backend/../frontend/js/dashboard_data.js
 [22:27:46 12/6/2026] [NODE] 🚀 [GITHUB] Đang chuẩn bị đồng bộ toàn bộ dữ liệu lên GitHub...
+[13/06/2026 18:03:55] [PYTHON - cao_du_lieu] ============ KÍCH HOẠT VƯỢT RÀO BẰNG PROXY GOOGLE ============
+[13/06/2026 18:03:55] [PYTHON - cao_du_lieu] 🌐 Đang gọi dữ liệu thông qua Proxy Google: 10-06-2026
+[13/06/2026 18:04:10] [PYTHON - cao_du_lieu] ❌ Lỗi xử lý qua proxy ngày 10-06-2026: HTTPSConnectionPool(host='api.allorigins.win', port=443): Read timed out. (read timeout=15)
+[13/06/2026 18:04:10] [PYTHON - cao_du_lieu] 🌐 Đang gọi dữ liệu thông qua Proxy Google: 11-06-2026
+[13/06/2026 18:04:26] [PYTHON - cao_du_lieu] ❌ Lỗi xử lý qua proxy ngày 11-06-2026: HTTPSConnectionPool(host='api.allorigins.win', port=443): Read timed out. (read timeout=15)
+[13/06/2026 18:04:26] [PYTHON - cao_du_lieu] 🌐 Đang gọi dữ liệu thông qua Proxy Google: 12-06-2026
+[13/06/2026 18:04:34] [PYTHON - cao_du_lieu] ❌ Proxy phản hồi lỗi HTTP: 408
+[13/06/2026 18:04:34] [PYTHON - cao_du_lieu] 🌐 Đang gọi dữ liệu thông qua Proxy Google: 13-06-2026
+[13/06/2026 18:04:49] [PYTHON - cao_du_lieu] ❌ Lỗi xử lý qua proxy ngày 13-06-2026: HTTPSConnectionPool(host='api.allorigins.win', port=443): Read timed out. (read timeout=15)
+[13/06/2026 18:04:49] [PYTHON - cao_du_lieu] ❌ Hệ thống proxy tạm thời bị quá tải, vui lòng thử lại sau.
+[13/06/2026 18:07:00] [PYTHON - cao_du_lieu] 🚀 Bắt đầu tiến trình kiểm tra và quét dữ liệu xổ số thiếu...
+[13/06/2026 18:07:00] [PYTHON - cao_du_lieu] 📡 Phát hiện hệ thống đang bị hổng 4 ngày: 10-06-2026, 11-06-2026, 12-06-2026, 13-06-2026
+[13/06/2026 18:07:00] [PYTHON - cao_du_lieu] 🌐 Đang gửi request kết nối cổng dữ liệu ngày: 10-06-2026...
+[13/06/2026 18:07:00] [PYTHON - cao_du_lieu] ⚠️ Không bóc tách được danh sách tên đài mở thưởng ngày 10-06-2026
+[13/06/2026 18:07:00] [PYTHON - cao_du_lieu] 🌐 Đang gửi request kết nối cổng dữ liệu ngày: 11-06-2026...
+[13/06/2026 18:07:01] [PYTHON - cao_du_lieu] ⚠️ Không bóc tách được danh sách tên đài mở thưởng ngày 11-06-2026
+[13/06/2026 18:07:01] [PYTHON - cao_du_lieu] 🌐 Đang gửi request kết nối cổng dữ liệu ngày: 12-06-2026...
+[13/06/2026 18:07:01] [PYTHON - cao_du_lieu] ⚠️ Không bóc tách được danh sách tên đài mở thưởng ngày 12-06-2026
+[13/06/2026 18:07:01] [PYTHON - cao_du_lieu] 🌐 Đang gửi request kết nối cổng dữ liệu ngày: 13-06-2026...
+[13/06/2026 18:07:01] [PYTHON - cao_du_lieu] ⚠️ Không bóc tách được danh sách tên đài mở thưởng ngày 13-06-2026
+[13/06/2026 18:07:01] [PYTHON - cao_du_lieu] ❌ Tiến trình kết thúc: Không tích hợp được thêm bất kỳ dòng dữ liệu mới nào cho chu kỳ này.
