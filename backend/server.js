@@ -3,7 +3,7 @@ const { spawn, exec } = require('child_process');
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit'); // Thư viện chống DOS/DDOS chuyên dụng
+const rateLimit = require('express-rate-limit'); 
 require('dotenv').config();
 
 const app = express();
@@ -17,24 +17,20 @@ const fs = require('fs');
 const path = require('path');
 
 const logPath = path.join(__dirname, 'system_log.txt');
-const MAX_LOG_SIZE_MB = 2; // Giới hạn file log tối đa 2MB để bảo vệ ổ đĩa Render
+const MAX_LOG_SIZE_MB = 2; 
 
-// HÀM GHI LOG THÔNG MINH - TỰ ĐỘNG CẮT TỈA CHỐNG PHÌNH TO FILE
 const logAction = (message) => {
     try {
         const timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
         const logEntry = `[${timestamp}] [NODE] ${message}\n`;
         
-        // 1. Kiểm tra dung lượng file log hiện tại trước khi ghi tiếp
         if (fs.existsSync(logPath)) {
             const stats = fs.statSync(logPath);
             const fileSizeInMegabytes = stats.size / (1024 * 1024);
             
-            // Nếu vượt quá giới hạn, tiến hành cắt bớt dữ liệu cũ
             if (fileSizeInMegabytes > MAX_LOG_SIZE_MB) {
                 const data = fs.readFileSync(logPath, 'utf8');
                 const lines = data.split('\n');
-                // Chỉ giữ lại 500 dòng log gần nhất để giải phóng không gian đĩa cứng
                 const trimmedData = lines.slice(-500).join('\n');
                 fs.writeFileSync(logPath, "[HỆ THỐNG] Đã tự động dọn dẹp cắt tỉa log cũ để bảo vệ tài nguyên...\n" + trimmedData, 'utf8');
             }
@@ -47,27 +43,20 @@ const logAction = (message) => {
     }
 };
 
-// -------------------------------------------------------------------
-// CẤU HÌNH BỘ LỌC CHỐNG TẤN CÔNG DOS/DDOS (RATE LIMITER)
-// -------------------------------------------------------------------
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // Khung thời gian: 15 phút
-    max: 10, // Tối đa 10 lần gọi/IP trong 15 phút đối với các API công khai
+    windowMs: 15 * 60 * 1000, 
+    max: 10, 
     statusCode: 429,
     message: {
         success: false,
         error: "Bạn đã gửi quá nhiều yêu cầu lên hệ thống. Vui lòng thử lại sau 15 phút."
     },
-    standardHeaders: true, // Trả về thông tin giới hạn trong header chuẩn
+    standardHeaders: true, 
     legacyHeaders: false, 
 });
 
-// Áp dụng bộ giới hạn tần suất lên toàn bộ các router của ứng dụng
 app.use('/api/', apiLimiter);
 
-// -------------------------------------------------------------------
-// MIDDLEWARE BẢO MẬT: CHỈ CHO PHÉP GITHUB ACTIONS HOẶC QUYỀN ADMIN KÍCH HOẠT
-// -------------------------------------------------------------------
 const verifySecretKey = (req, res, next) => {
     const secretKey = req.headers['x-secret-key'] || req.query.secret;
     const systemSecret = process.env.MLOPS_SECRET_KEY || "ChucNangBaoMatMLOps2026";
@@ -79,16 +68,13 @@ const verifySecretKey = (req, res, next) => {
             error: "Truy cập bị từ chối. Bạn không có mã bảo mật kích hoạt hệ thống." 
         });
     }
-    next(); // Hợp lệ thì cho đi tiếp
+    next(); 
 };
 
-// -------------------------------------------------------------------
-// [MÃ NGUỒN CÁC TIẾN TRÌNH PYTHON GIỮ NGUYÊN]
-// -------------------------------------------------------------------
 const initPythonEnvironment = () => {
     return new Promise((resolve) => {
         logAction("🛠️ [MÔI TRƯỜNG] Đang kiểm tra và đồng bộ nhanh các thư viện AI qua PIP...");
-        const checkEnvCmd = `python -m pip install -q --no-cache-dir --prefer-binary -r requirements.txt --break-system-packages > /dev/null 2>&1`;
+        const checkEnvCmd = `python3 -m pip install -q --no-cache-dir --prefer-binary -r requirements.txt --break-system-packages > /dev/null 2>&1`;
         exec(checkEnvCmd, (error) => {
             if (error) logAction(`⚠️ Cảnh báo môi trường: ${error.message}`);
             else logAction("✅ [MÔI TRƯỜNG] Các thư viện Python đã được nạp sẵn sàng vào hệ thống!");
@@ -97,10 +83,11 @@ const initPythonEnvironment = () => {
     });
 };
 
+// Hàm chạy script Python chuẩn hóa sử dụng python3
 const runPythonScript = (scriptName, args = []) => {
     return new Promise((resolve, reject) => {
         logAction(`🛠️ Robot đang kích hoạt chạy tiến trình AI: [${scriptName}]...`);
-        const pythonProcess = spawn('python', [scriptName, ...args]);
+        const pythonProcess = spawn('python3', [scriptName, ...args]);
         let output = ''; let error = '';
         pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
         pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
@@ -128,41 +115,70 @@ const autoPushToGitHub = () => {
     });
 };
 
+// ===================================================================
+// CHUẨN HÓA TOÀN BỘ WORKFLOW: CHỈ TÍNH TOÁN TIẾP NẾU CÓ CẬP NHẬT MỚI
+// ===================================================================
 const runDailyMLOpsPipeline = async () => {
     const startTime = Date.now();
     logAction("\n======================================================================");
     logAction(`⚡ [START WORKFLOW] KÍCH HOẠT CHUỖI QUY TRÌNH MLOPS TỰ ĐỘNG`);
     logAction("======================================================================");
+    
     try {
-        await runPythonScript('cao_du_lieu_tu_dong.py');
+        // Bước 1: Chạy file cào dữ liệu và hứng kết quả text từ stdout
+        const crawlResultRaw = await runPythonScript('cao_du_lieu_tu_dong.py');
+        let hasNewData = false;
+
+        try {
+            // Thử bóc tách chuỗi JSON trả về từ file Python
+            const jsonMatch = crawlResultRaw.match(/\{.*\}/s);
+            if (jsonMatch) {
+                const crawlJson = JSON.parse(jsonMatch[0]);
+                hasNewData = crawlJson.has_new_data === true;
+                logAction(`📊 Kết quả phân tích: ${crawlJson.message}`);
+            }
+        } catch (jsonErr) {
+            logAction("⚠️ Không thể phân tích JSON từ script cào, ép buộc kiểm tra thủ công.");
+            hasNewData = true; // Phòng hờ lỗi kết cấu log thì vẫn cho chạy tiếp
+        }
+
+        // ĐIỀU KIỆN CHẶN THÔNG MINH
+        if (!hasNewData) {
+            logAction("🛑 [HỦY CHU KỲ] Không phát hiện dòng dữ liệu mới trong file tổng hợp. Toàn bộ các bước huấn luyện AI phía sau được tạm dừng để bảo vệ tài nguyên.");
+            logAction(`🎉 Quy trình đóng lại an toàn sau ${Math.round((Date.now() - startTime) / 1000)} giây.\n`);
+            return;
+        }
+
+        // NẾU CÓ DỮ LIỆU MỚI -> KÍCH HOẠT TOÀN BỘ LUỒNG TÍNH TOÁN
+        logAction("🔥 Phát hiện dữ liệu mới! Kích hoạt toàn bộ luồng xử lý AI & Đóng gói...");
         await runPythonScript('chuyen_thanh_du_lieu_huan_luyen.py');
         await runPythonScript('master_ai.py');        
         await runPythonScript('du_doan.py'); 
         await runPythonScript('build_js_data.py');
-        try { await autoPushToGitHub(); } catch (gitErr) { logAction("⚠️ Git push thất bại."); }
-        logAction(`🎉 [HOÀN THÀNH XUẤT SẮC] Tiến trình chạy ngầm mất ${Math.round((Date.now() - startTime) / 1000)} giây!\n`);
+        
+        try { 
+            await autoPushToGitHub(); 
+        } catch (gitErr) { 
+            logAction("⚠️ Git push thất bại nhưng dữ liệu local đã được cập nhật."); 
+        }
+        
+        logAction(`🎉 [HOÀN THÀNH XUẤT SẮC] Toàn bộ hệ thống AI đã được tái cấu trúc thành công trong ${Math.round((Date.now() - startTime) / 1000)} giây!\n`);
     } catch (err) {
         logAction(`💥 [SỰ CỐ NGHIÊM TRỌNG] Chuỗi quy trình tự động bị đứt gãy: ${err}\n`);
     }
 };
-
-// -------------------------------------------------------------------
-// 5. CÁC ĐIỂM KẾT NỐI API ĐÃ ĐƯỢC BẢO MẬT CHỐNG SPAM / DDOS
-// -------------------------------------------------------------------
 
 cron.schedule('0 9 * * *', () => {
     logAction("⏰ [ĐỒNG HỒ NỘI BỘ] Điểm mốc 9h00 sáng, kích hoạt chuỗi tự động...");
     runDailyMLOpsPipeline();
 }, { scheduled: true, timezone: "Asia/Ho_Chi_Minh" });
 
-// BẢO MẬT API PING: Chỉ cho phép GitHub gọi lên kèm theo mã khóa Secret Key bí mật
 app.get('/ping', apiLimiter, verifySecretKey, (req, res) => {
     logAction(` NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
-    res.json({ success: true, status: "Hệ thống xác thực thành công. Pipeline đang khởi chạy ngầm..." });
+    res.json({ success: true, status: "Hệ thống xác thực thành công. Pipeline đang kiểm tra dữ liệu ngầm..." });
     runDailyMLOpsPipeline();
 });
 
-// GIAO DIỆN XEM LOG LIVE TỰ ĐỘNG REFRESH MƯỢT MÀ
 app.get('/logs', (req, res) => {
     const logFilePath = path.join(__dirname, 'system_log.txt');
     if (req.query.raw === 'true') {
@@ -190,68 +206,39 @@ app.get('/logs', (req, res) => {
     `);
 });
 
-// API CHẠY DUY NHẤT TIẾN TRÌNH CÀO DỮ LIỆU ĐỂ KIỂM TRA LOG
-app.get('/crawl', (req, res) => {
+// API ROUTER /CRAWL ĐỘC LẬP: CHỈ CHẠY DUY NHẤT KHÂU CÀO
+app.get('/crawl', apiLimiter, async (req, res) => {
     logAction("⚡ Nhận lệnh kích hoạt RIÊNG TIẾN TRÌNH CÀO TỰ ĐỘNG thông qua đường dẫn /crawl");
-    
-    // Gọi riêng file cao_du_lieu_tu_dong.py, không chạy các bước AI phía sau
-    const pythonProcess = spawn('python', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
-    //await initPythonEnvironment();
-    
-    let output = '';
-    let error = '';
-
-    pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
-    pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
-
-    pythonProcess.on('close', (code) => {
-        if (code === 0) {
-            res.json({ 
-                success: true, 
-                message: "Tiến trình cào đã chạy xong ngầm. Bạn hãy vào kiểm tra file /logs để xem kết quả chi tiết." 
-            });
-        } else {
-            res.status(500).json({ 
-                success: false, 
-                error: "Tiến trình Python bị văng lỗi hệ thống.", 
-                details: error 
-            });
-        }
-    });
+    try {
+        await initPythonEnvironment();
+        const pythonProcess = spawn('python3', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
+        let output = ''; let error = '';
+        pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
+        pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
+        pythonProcess.on('close', (code) => {
+            if (code === 0) {
+                res.json({ success: true, message: "Tiến trình cào đã chạy xong độc lập. Hãy vào xem /logs." });
+            } else {
+                res.status(500).json({ success: false, error: "Tiến trình Python văng lỗi.", details: error });
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-   try {
+    try {
         logAction("🔄 [AUTO-START] Hệ thống bắt đầu nạp cấu hình chạy thử nghiệm tự động...");
-        
-        // 1. Đồng bộ môi trường Python trước
         await initPythonEnvironment();
         
-        logAction("⚡ [AUTO-START] Kích hoạt riêng tiến trình cào dữ liệu ngầm (Test Crawl)...");
-        
-        // 2. Gọi tiến trình python3 chạy file cào dữ liệu độc lập
-        const autoCrawlProcess = spawn('python3', [path.join(__dirname, 'cao_du_lieu_tu_dong.py')]);
-        
-        let autoOutput = '';
-        let autoError = '';
-
-        autoCrawlProcess.stdout.on('data', (data) => { autoOutput += data.toString(); });
-        autoCrawlProcess.stderr.on('data', (data) => { autoError += data.toString(); });
-
-        autoCrawlProcess.on('close', (code) => {
-            if (code === 0) {
-                logAction("✅ [AUTO-START] Tiến trình cào tự động lúc khởi động đã hoàn tất thành công.");
-                logAction("📝 Hãy truy cập đường dẫn /logs để xem kết quả bóc tách văn bản!");
-            } else {
-                logAction(`❌ [AUTO-START] Tiến trình cào tự động thất bại với mã thoát: ${code}`);
-                logAction(`❌ Chi tiết lỗi Python: ${autoError}`);
-            }
-        });
-
+        logAction("⚡ [AUTO-START] Kích hoạt chuỗi quy trình chính (Pipeline Check)...");
+        // Khi server vừa build xong, tự khởi chạy luôn pipeline kiểm tra xem có dữ liệu mới không
+        runDailyMLOpsPipeline();
     } catch (startErr) {
-        logAction(`💥 [AUTO-START] Không thể khởi chạy tiến trình kiểm tra tự động: ${startErr.message}`);
+        logAction(`💥 [AUTO-START] Lỗi khởi động: ${startErr.message}`);
     }
 });
