@@ -273,12 +273,17 @@ document.getElementById('auth-password').addEventListener('keypress', function (
     if (e.key === 'Enter') checkLogin();
 });
 
-async function checkLogin() {
+
+       async function checkLogin() {
     const inputPass = document.getElementById('auth-password').value;
     const errorMsg = document.getElementById('login-error');
     
     try {
-        // 1. Gửi mật khẩu thô lên Render bằng URL tuyệt đối để đối soát
+        errorMsg.style.display = 'none';
+        errorMsg.style.color = '#eab308'; // Màu vàng cảnh báo
+        errorMsg.textContent = "Đang xác thực...";
+        errorMsg.style.display = 'block';
+
         const response = await fetch(`${BACKEND_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -288,27 +293,43 @@ async function checkLogin() {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            // 2. Nếu Render trả về đúng, ẩn overlay đăng nhập và hiện giao diện chính
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-app-wrapper').style.display = 'block';
             
-            // 3. Tải trực tiếp file dữ liệu tĩnh nằm ở thư mục js/ trên hosting GitHub Pages
+            // ÉP TRÌNH DUYỆT BỎ CACHE BẰNG CÁCH THÊM DẤU THỜI GIAN
+            const noCache = new Date().getTime(); 
+
+            // TẢI FILE DỮ LIỆU
             const dataScript = document.createElement('script');
-            dataScript.src = 'js/dashboard_data.js'; 
+            dataScript.src = `js/dashboard_data.js?v=${noCache}`;
             document.body.appendChild(dataScript);
 
             dataScript.onload = () => {
-                // 4. Khi dữ liệu 20 năm tải xong, nạp tiếp file logic app.js cục bộ
+                console.log("✅ Đã nạp thành công file dữ liệu 20 năm.");
+                
+                // TẢI FILE LOGIC ĐỒ HỌA
                 const appScript = document.createElement('script');
-                appScript.src = 'js/app.js';
+                appScript.src = `js/app.js?v=${noCache}`;
                 document.body.appendChild(appScript);
+
+                appScript.onload = () => console.log("✅ Đã khởi chạy app.js");
+                
+                appScript.onerror = () => {
+                    alert("❌ LỖI HIỂN THỊ: Không tìm thấy file js/app.js trên thư mục GitHub của bạn.");
+                };
             };
+
+            dataScript.onerror = () => {
+                alert("❌ LỖI NGHIÊM TRỌNG: Không thể tải file js/dashboard_data.js!\n\nKhả năng cao là bạn vẫn đang chặn file này trong tệp .gitignore nên nó chưa được đẩy lên GitHub Pages.");
+            };
+
         } else {
+            errorMsg.style.color = '#ef4444';
             errorMsg.textContent = data.message || "Mật khẩu không chính xác!";
             errorMsg.style.display = 'block';
         }
     } catch (error) {
-        console.error("Lỗi đăng nhập:", error);
+        errorMsg.style.color = '#ef4444';
         errorMsg.textContent = "Không thể kết nối đến máy chủ xác thực Render!";
         errorMsg.style.display = 'block';
     }
