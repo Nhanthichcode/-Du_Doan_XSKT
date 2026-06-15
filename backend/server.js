@@ -66,7 +66,7 @@ app.get('/', (req, res) => {
 app.use('/api/', apiLimiter);
 
 const verifySecretKey = (req, res, next) => {
-    const secretKey = req.headers['X-Secret-Key'] || req.query.secret;
+    const secretKey = req.headers['x-secret-key'] || req.query.secret;
     const systemSecret = process.env.MLOPS_SECRET_KEY || "ChucNangBaoMatMLOps2026";
 
     if (!secretKey || secretKey !== systemSecret) {
