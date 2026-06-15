@@ -55,12 +55,32 @@ const apiLimiter = rateLimit({
     legacyHeaders: false, 
 });
 
+const apiLogsLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, 
+    max: 10, 
+    statusCode: 429,
+    message: {
+        success: false,
+        error: "Bạn đã gửi quá nhiều yêu cầu lên hệ thống. Vui lòng thử lại sau 15 phút."
+    },
+    standardHeaders: true, 
+    legacyHeaders: false, 
+});
+
 app.get('/', (req, res) => {
     logAction("⚠️ Phát hiện một truy cập trái phép cố tình vào gốc định tuyến / của Render.");
     return res.status(403).json({
         success: false,
         error: "Access Denied: Máy chủ này chỉ phục vụ các tác vụ API MLOps nội bộ."
     });
+});
+
+app.get('/api/system-log', (req, res) => {
+    if (fs.existsSync(logPath)) {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        return res.sendFile(logPath);
+    }
+    res.status(404).send("Chưa có dữ liệu nhật ký hệ thống.");
 });
 
 app.use('/api/', apiLimiter);
@@ -75,11 +95,11 @@ const verifySecretKey = (req, res, next) => {
         process.env.MLOPS_SECRET_KEY?.trim();
 
 logAction(
-  `[DEBUG] ENV JSON: ${JSON.stringify(systemSecret)}`
+    `[DEBUG] ENV JSON: ${JSON.stringify(systemSecret)}`
 );
 
 logAction(
-  `[DEBUG] CLIENT JSON: ${JSON.stringify(secretKey)}`
+    `[DEBUG] CLIENT JSON: ${JSON.stringify(secretKey)}`
 );
 
     logAction(
