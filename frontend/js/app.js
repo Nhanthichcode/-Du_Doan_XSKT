@@ -13,17 +13,13 @@ let filteredTableData = [];
 function initPermanentDashboard() {
     if (typeof xoso_data === 'undefined') {
         console.error("❌ Không tìm thấy biến dữ liệu xoso_data tĩnh!");
-        const backtestDiv = document.getElementById('backtest-list');
-        if (backtestDiv) {
-            backtestDiv.innerHTML = `<p style="color: #ef4444; padding: 10px;">Lỗi: Thiếu dữ liệu dashboard_data.js. Hãy kiểm tra lại file data.</p>`;
-        }
         return;
     }
 
     const data = xoso_data;
     document.getElementById('lbl-time').innerText = data.build_time || "Đang cập nhật...";
 
-    // 1. CHUYỂN ĐỔI MẢNG LINES_Y SANG RECORDS ĐỂ PHÂN TRANG VÀ TRA CỨU
+    // Khởi tạo mảng Records cho Table Tra cứu
     allHistoricalRecords = [];
     data.timeline_x.forEach((dateStr, dateIdx) => {
         for (const [stationName, points] of Object.entries(data.lines_y)) {
@@ -46,240 +42,154 @@ function initPermanentDashboard() {
     allHistoricalRecords.sort((a, b) => b.date - a.date);
     filteredTableData = [...allHistoricalRecords];
 
-    // 2. LOAD FILE JSON VỚI MÃ CHỐNG CACHE TRÌNH DUYỆT
+    // PHÂN TÁCH SỐ VÀNG & LỊCH SỬ ĐỐI CHIẾU HOÀN TOÀN TỪ FILE JSON
     const noCacheUrl = 'js/history_predictions.json?t=' + new Date().getTime();
 
     fetch(noCacheUrl)
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(historyJson => {
-            try {
-                const dates = Object.keys(historyJson);
-                if (dates.length === 0) {
-                    document.getElementById('backtest-list').innerHTML = `<p style="color: var(--text-muted); padding: 10px; font-size: 13px;">File JSON dự đoán đang trống.</p>`;
-                    return;
-                }
+            const dates = Object.keys(historyJson);
+            if (dates.length === 0) return;
 
-                // Sắp xếp ngày từ mới nhất đến cũ nhất
-                const convertToDateObject = (dateStr) => {
-                    const parts = dateStr.replace(/-/g, '/').split('/');
-                    return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-                };
-                dates.sort((a, b) => convertToDateObject(b) - convertToDateObject(a));
+            // Sắp xếp JSON keys (ngày tháng) từ mới nhất đến cũ nhất
+            const convertToDateObject = (dateStr) => {
+                const parts = dateStr.replace(/-/g, '/').split('/');
+                return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            };
+            dates.sort((a, b) => convertToDateObject(b) - convertToDateObject(a));
 
-                // Ngày đầu tiên (mới nhất) sẽ làm Số Vàng
-                const latestDate = dates[0];
-                const predictDiv = document.getElementById('prediction-list');
-                const backtestDiv = document.getElementById('backtest-list');
+            // --- 1. SỐ VÀNG TIẾP THEO (Chỉ lấy ngày đầu tiên) ---
+            const latestDate = dates[0];
+            const predictDiv = document.getElementById('prediction-list');
+            const lblPredDate = document.getElementById('lbl-pred-date');
+            
+            if (lblPredDate) lblPredDate.textContent = latestDate;
 
-                const lblPredDate = document.getElementById('lbl-pred-date');
-                if (lblPredDate) lblPredDate.textContent = latestDate;
+            let predictHtml = "";
+            if (historyJson[latestDate] && Array.isArray(historyJson[latestDate])) {
+                historyJson[latestDate].forEach(item => {
+                    if (!item.predictions) return;
 
-                // --- HIỂN THỊ DỰ ĐOÁN MỚI NHẤT (SỐ VÀNG) ---
-                let predictHtml = "";
-                if (historyJson[latestDate] && Array.isArray(historyJson[latestDate])) {
-                    historyJson[latestDate].forEach(item => {
-                        if (!item.predictions || !Array.isArray(item.predictions)) return;
-
-                        predictHtml += `
-                            <div class="gold-card" style="margin-bottom: 10px;">
-                                <div class="gold-header">
-                                    <span class="gold-dai">${(item.dai || "Chưa rõ").toUpperCase()}</span>
-                                </div>
-                                <div class="pred-group">
-                                    ${item.predictions.map((p, i) => `
-                                        <div class="pred-row ${i === 0 ? 'primary-pred' : ''}">
-                                            <span class="badge-priority">Ưu Tiên ${i + 1}</span>
-                                            <span class="${i === 0 ? 'gold-num' : 'gold-num-sm'}">${String(p.so).padStart(2, '0')}</span>
-                                            <span class="${i === 0 ? 'gold-percent' : 'gold-percent-sm'}">${p.xac_suat}%</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="gold-details">
-                                    <span>• Mô hình học máy Random Forest Live</span>
-                                    <span>• Trạng thái chu kỳ: Cập nhật tự động</span>
-                                </div>
+                    predictHtml += `
+                        <div class="gold-card" style="margin-bottom: 10px;">
+                            <div class="gold-header">
+                                <span class="gold-dai">${item.dai.toUpperCase()}</span>
                             </div>
-                        `;
-                    });
-                }
-                
-                if (predictDiv) {
-                    predictDiv.innerHTML = predictHtml !== "" ? predictHtml : `<p style="color:var(--text-muted); font-size:13px; padding:10px;">Không có dự đoán cho ngày này.</p>`;
-                }
+                            <div class="pred-group">
+                                ${item.predictions.map((p, i) => `
+                                    <div class="pred-row ${i === 0 ? 'primary-pred' : ''}">
+                                        <span class="badge-priority">Ưu Tiên ${i + 1}</span>
+                                        <span class="${i === 0 ? 'gold-num' : 'gold-num-sm'}">${String(p.so).padStart(2, '0')}</span>
+                                        <span class="${i === 0 ? 'gold-percent' : 'gold-percent-sm'}">${p.xac_suat}%</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="gold-details">
+                                <span>• Mô hình AI: Random Forest Live</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            if (predictDiv) predictDiv.innerHTML = predictHtml || `<p>Chưa có dự báo.</p>`;
 
-                // --- HIỂN THỊ LỊCH SỬ ĐỐI CHIẾU ---
-                let backtestHtml = "";
+            // --- 2. ĐỐI CHIẾU LỊCH SỬ KỲ TRƯỚC (Quét các ngày đã có actual_g8) ---
+            const backtestDiv = document.getElementById('backtest-list');
+            let backtestHtml = "";
 
-                const cleanStationName = (name) => {
-                    if (!name) return "";
-                    return name.toLowerCase()
-                               .replace(/hồ chí minh/g, 'hcm')
-                               .replace(/tp\.hcm/g, 'hcm')
-                               .replace(/tp\. hồ chí minh/g, 'hcm')
-                               .replace(/tp\./g, '')
-                               .replace(/\s+/g, '')
-                               .trim();
-                };
+            dates.forEach(date => {
+                if (historyJson[date] && Array.isArray(historyJson[date])) {
+                    historyJson[date].forEach(pred => {
+                        if (!pred.predictions) return;
 
-                const formatNormalDate = (dateStr) => {
-                    const parts = dateStr.replace(/-/g, '/').split('/');
-                    return `${String(parts[0]).padStart(2, '0')}/${String(parts[1]).padStart(2, '0')}/${parts[2]}`;
-                };
+                        // CHỈ IN RA MÀN HÌNH NẾU NGÀY ĐÓ ĐÃ CÓ KẾT QUẢ THỰC TẾ (actual_g8) TỪ PYTHON
+                        if (pred.actual_g8 !== undefined && pred.actual_g8 !== null && pred.actual_g8 !== "") {
+                            const actualG8Str = String(pred.actual_g8).padStart(2, '0');
+                            const isWin = pred.is_hit === true || pred.is_hit === "true";
 
-                dates.forEach(date => {
-                    const searchDate = formatNormalDate(date);
-                    const targetIndex = data.timeline_x.indexOf(searchDate);
-
-                    if (historyJson[date] && Array.isArray(historyJson[date])) {
-                        historyJson[date].forEach(pred => {
-                            if (!pred.predictions || !Array.isArray(pred.predictions)) return;
-
-                            let realResult = null;
-
-                            if (pred.actual_g8 !== undefined && pred.actual_g8 !== null && pred.actual_g8 !== "") {
-                                realResult = pred.actual_g8;
-                            } else {
-                                for (const [lineName, points] of Object.entries(data.lines_y)) {
-                                    if (cleanStationName(lineName) === cleanStationName(pred.dai)) {
-                                        if (targetIndex !== -1 && points[targetIndex] !== null && points[targetIndex] !== undefined) {
-                                            realResult = points[targetIndex];
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (realResult !== null) {
-                                const actualG8Str = String(realResult).padStart(2, '0');
-                                
-                                let isWin = false;
-                                if (pred.is_hit !== undefined) {
-                                    isWin = pred.is_hit === true || pred.is_hit === "true"; 
-                                } else {
-                                    isWin = pred.predictions.some(p => String(p.so).padStart(2, '0') === actualG8Str);
-                                }
-
-                                backtestHtml += `
-                                    <div class="history-item" style="margin-bottom: 10px;">
-                                        ${isWin ? `
-                                        <div class="match-celebration-banner">
-                                            <span>TRÚNG LÔ GIẢI 8 [${actualG8Str}]</span>
-                                        </div>` : ''}
-                                        <div class="history-meta">
-                                            <span>${pred.dai}</span>
-                                            <span class="${isWin ? 'log-success' : 'log-info'}" style="font-weight: 600;">
-                                                ${isWin ? 'CHẮC ĂN TRÚNG' : 'Chưa khớp kỳ này'}
-                                            </span>
-                                        </div>
-                                        <div class="history-data">
-                                            <span class="history-dai-name">Giải 8 Thực Tế (${searchDate})</span>
-                                            <span class="history-result">${actualG8Str}</span>
-                                        </div>
-                                        <div class="predictions-comparison">
-                                            <span>Bộ 3 số AI dự báo kỳ trước:</span>
-                                            <div class="pred-badge-group">
-                                                ${pred.predictions.map(p => {
-                                                    const isHit = String(p.so).padStart(2, '0') === actualG8Str;
-                                                    return `<span class="pred-badge ${isHit ? 'hit' : ''}">${String(p.so).padStart(2, '0')}</span>`;
-                                                }).join('')}
-                                            </div>
+                            backtestHtml += `
+                                <div class="history-item" style="margin-bottom: 10px;">
+                                    ${isWin ? `
+                                    <div class="match-celebration-banner">
+                                        <span>🎯 TRÚNG LÔ GIẢI 8 [${actualG8Str}]</span>
+                                    </div>` : ''}
+                                    <div class="history-meta">
+                                        <span>${pred.dai}</span>
+                                        <span style="font-size:11px;">${date}</span>
+                                    </div>
+                                    <div class="history-data">
+                                        <span class="history-dai-name">Giải 8 Thực Tế Về:</span>
+                                        <span class="history-result">${actualG8Str}</span>
+                                    </div>
+                                    <div class="predictions-comparison">
+                                        <span>AI từng dự báo: [${pred.predictions.map(p => String(p.so).padStart(2, '0')).join(', ')}]</span>
+                                        <div style="text-align:right; margin-top: 4px; font-weight:600; font-size:11px;">
+                                            ${isWin ? `<span style="color:#10b981;">Thắng</span>` : `<span style="color:var(--text-muted);">Trượt</span>`}
                                         </div>
                                     </div>
-                                `;
-                            }
-                        });
-                    }
-                });
-
-                if (backtestDiv) {
-                    backtestDiv.innerHTML = backtestHtml || `<div class="chart-tip">Dữ liệu đối chiếu kỳ trước chưa sẵn sàng...</div>`;
+                                </div>
+                            `;
+                        }
+                    });
                 }
+            });
 
-            } catch (jsonErr) {
-                console.error("❌ Lỗi đứt gãy ngầm khi duyệt JSON:", jsonErr);
-                const predictDiv = document.getElementById('prediction-list');
-                const backtestDiv = document.getElementById('backtest-list');
-                if (predictDiv) predictDiv.innerHTML = `<div class="chart-tip" style="color: #ef4444;">Lỗi cấu trúc dữ liệu JSON. Vui lòng kiểm tra console.</div>`;
-                if (backtestDiv) backtestDiv.innerHTML = `<div class="chart-tip" style="color: #ef4444;">Không thể đối chiếu do lỗi dữ liệu.</div>`;
+            if (backtestDiv) {
+                backtestDiv.innerHTML = backtestHtml || `<div class="chart-tip">Dữ liệu đối chiếu chưa sẵn sàng...</div>`;
             }
         })
-        .catch(err => {
-            console.error("❌ Lỗi Tải Tệp Dự Đoán (Fetch Error):", err);
-            const predictDiv = document.getElementById('prediction-list');
-            const backtestDiv = document.getElementById('backtest-list');
-            if (predictDiv) predictDiv.innerHTML = `<div class="chart-tip" style="color: #ef4444;">Lỗi: Không tìm thấy file JSON dự đoán trên máy chủ.</div>`;
-            if (backtestDiv) backtestDiv.innerHTML = `<div class="chart-tip" style="color: #ef4444;">Đang chờ liên kết hệ thống...</div>`;
-        });
+        .catch(err => console.error("Lỗi JSON:", err));
 
-    // 3. KHỞI TẠO BIỂU ĐỒ HOẠT ĐỘNG
+    // KÍCH HOẠT VẼ BIỂU ĐỒ BẢN ĐỒ VÀ BẢNG
     renderAdvanceChart('recent', data);
     renderHistoricalTable();
 
-    // Các sự kiện UI bảng biểu
+    // SỰ KIỆN TÌM KIẾM
     const searchInput = document.getElementById("table-search-input");
     const filterYearSelect = document.getElementById("table-filter-year");
-
     const updateTableFilters = () => {
         const searchVal = searchInput.value.toLowerCase().trim();
         const yearVal = filterYearSelect.value;
-
         filteredTableData = allHistoricalRecords.filter(item => {
             const matchSearch = item.dai.toLowerCase().includes(searchVal) || String(item.g8).includes(searchVal) || item.dateStr.includes(searchVal);
             const matchYear = yearVal === "all" || item.year === parseInt(yearVal);
             return matchSearch && matchYear;
         });
-
         tableCurrentPage = 1;
         renderHistoricalTable();
     };
-
     if (searchInput && filterYearSelect) {
         searchInput.addEventListener("input", updateTableFilters);
         filterYearSelect.addEventListener("change", updateTableFilters);
     }
 
+    // SỰ KIỆN PHÂN TRANG
     const btnTablePrev = document.getElementById("btn-table-prev");
     const btnTableNext = document.getElementById("btn-table-next");
-
     if (btnTablePrev && btnTableNext) {
         btnTablePrev.addEventListener("click", () => {
-            if (tableCurrentPage > 1) {
-                tableCurrentPage--;
-                renderHistoricalTable();
-            }
+            if (tableCurrentPage > 1) { tableCurrentPage--; renderHistoricalTable(); }
         });
-
         btnTableNext.addEventListener("click", () => {
             const maxPage = Math.ceil(filteredTableData.length / tablePageSize);
-            if (tableCurrentPage < maxPage) {
-                tableCurrentPage++;
-                renderHistoricalTable();
-            }
+            if (tableCurrentPage < maxPage) { tableCurrentPage++; renderHistoricalTable(); }
         });
     }
 
+    // SỰ KIỆN BIỂU ĐỒ
     const cboTimeframe = document.getElementById("cbo-timeframe");
     if (cboTimeframe) {
-        cboTimeframe.addEventListener("change", (e) => {
-            renderAdvanceChart(e.target.value, data);
-        });
+        cboTimeframe.addEventListener("change", (e) => { renderAdvanceChart(e.target.value, data); });
     }
 
-    // =========================================================================
-    // LÀM MƯỢT THAO TÁC ẨN/HIỆN ĐỒNG BỘ ĐƯỜNG VÀ SỐ (FIXED)
-    // Sử dụng setDatasetVisibility thay cho .hide()/.show() và update('none')
-    // =========================================================================
+    // HOẠT ẢNH MƯỢT MÀ KHI ẨN/HIỆN ĐƯỜNG VẼ
     const btnDeselect = document.getElementById('btn-deselect-all');
     if (btnDeselect) {
         btnDeselect.addEventListener('click', () => {
             if (!historyChart) return;
             historyChart.data.datasets.forEach((dataset, index) => {
-                historyChart.setDatasetVisibility(index, false); // Trực tiếp ẩn thay vì tạo hoạt ảnh chèn lấn
+                historyChart.setDatasetVisibility(index, false); 
             });
-            // 'none' giúp vô hiệu hoá transition fade-out, số và đường sẽ biến mất trong tích tắc cực mượt
             historyChart.update('none'); 
         });
     }
@@ -295,19 +205,10 @@ function initPermanentDashboard() {
         });
     }
 
-    // Các thao tác điều hướng biểu đồ
-    document.getElementById("btn-zoom-in").addEventListener("click", () => {
-        if (historyChart) historyChart.zoom(1.2);
-    });
-
-    document.getElementById("btn-zoom-out").addEventListener("click", () => {
-        if (historyChart) historyChart.zoom(0.8);
-    });
-
-    document.getElementById("btn-zoom-reset").addEventListener("click", () => {
-        if (historyChart) historyChart.resetZoom();
-    });
-
+    // SỰ KIỆN ZOOM/PAN
+    document.getElementById("btn-zoom-in").addEventListener("click", () => { if (historyChart) historyChart.zoom(1.2); });
+    document.getElementById("btn-zoom-out").addEventListener("click", () => { if (historyChart) historyChart.zoom(0.8); });
+    document.getElementById("btn-zoom-reset").addEventListener("click", () => { if (historyChart) historyChart.resetZoom(); });
     document.getElementById("btn-pan-left").addEventListener("click", () => {
         if (historyChart) {
             const xAxis = historyChart.scales.x;
@@ -317,7 +218,6 @@ function initPermanentDashboard() {
             historyChart.update();
         }
     });
-
     document.getElementById("btn-pan-right").addEventListener("click", () => {
         if (historyChart) {
             const xAxis = historyChart.scales.x;
@@ -524,7 +424,6 @@ function renderHistoricalTable() {
     document.getElementById("btn-table-next").disabled = endIndex >= filteredTableData.length;
 }
 
-// LOGIC TOGGLE SIDEBAR (ĐÓNG MỞ THANH BÊN)
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 if (btnToggleSidebar) {
     btnToggleSidebar.addEventListener('click', () => {
@@ -550,6 +449,6 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
         initPermanentDashboard();
     } catch (err) {
-        console.warn("Lỗi khởi chạy môi trường: ", err);
+        console.warn("Lỗi khởi chạy: ", err);
     }
 });
