@@ -12,7 +12,7 @@ OUTPUT_FILE = os.path.join(BASE_DIR, 'data_training_ai.csv')
 
 # 2. HÀM GHI LOG ĐỒNG BỘ VÀO SYSTEM_LOG.TXT
 def log_action(message):
-    timestamp = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });'
     log_entry = f"[{timestamp}] [PYTHON - chuyen_du_lieu] {message}\n"
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:

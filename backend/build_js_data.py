@@ -133,7 +133,7 @@ def export_permanent_mlops_data():
                 
     # --- KIẾN TRÚC MỚI TINH GỌN ---
     # Loại bỏ hoàn toàn top_3_today để tránh dư thừa và xung đột múi giờ hệ thống
-    vn_now = datetime.utcnow() + timedelta(hours=7)
+    vn_now = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });'    
     final_package = {
         "build_time": vn_now.strftime('%d/%m/%Y %H:%M:%S'),
         "timeline_x": all_dates,
