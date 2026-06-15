@@ -19,7 +19,6 @@ function initPermanentDashboard() {
     const data = xoso_data;
     document.getElementById('lbl-time').innerText = data.build_time || "Đang cập nhật...";
 
-    // Khởi tạo mảng Records cho Table Tra cứu
     allHistoricalRecords = [];
     data.timeline_x.forEach((dateStr, dateIdx) => {
         for (const [stationName, points] of Object.entries(data.lines_y)) {
@@ -42,7 +41,6 @@ function initPermanentDashboard() {
     allHistoricalRecords.sort((a, b) => b.date - a.date);
     filteredTableData = [...allHistoricalRecords];
 
-    // PHÂN TÁCH SỐ VÀNG & LỊCH SỬ ĐỐI CHIẾU HOÀN TOÀN TỪ FILE JSON
     const noCacheUrl = 'js/history_predictions.json?t=' + new Date().getTime();
 
     fetch(noCacheUrl)
@@ -51,14 +49,13 @@ function initPermanentDashboard() {
             const dates = Object.keys(historyJson);
             if (dates.length === 0) return;
 
-            // Sắp xếp JSON keys (ngày tháng) từ mới nhất đến cũ nhất
             const convertToDateObject = (dateStr) => {
                 const parts = dateStr.replace(/-/g, '/').split('/');
                 return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
             };
             dates.sort((a, b) => convertToDateObject(b) - convertToDateObject(a));
 
-            // --- 1. SỐ VÀNG TIẾP THEO (Chỉ lấy ngày đầu tiên) ---
+            // --- SỐ VÀNG TIẾP THEO ---
             const latestDate = dates[0];
             const predictDiv = document.getElementById('prediction-list');
             const lblPredDate = document.getElementById('lbl-pred-date');
@@ -93,7 +90,7 @@ function initPermanentDashboard() {
             }
             if (predictDiv) predictDiv.innerHTML = predictHtml || `<p>Chưa có dự báo.</p>`;
 
-            // --- 2. ĐỐI CHIẾU LỊCH SỬ KỲ TRƯỚC (Quét các ngày đã có actual_g8) ---
+            // --- ĐỐI CHIẾU LỊCH SỬ KỲ TRƯỚC ---
             const backtestDiv = document.getElementById('backtest-list');
             let backtestHtml = "";
 
@@ -102,7 +99,6 @@ function initPermanentDashboard() {
                     historyJson[date].forEach(pred => {
                         if (!pred.predictions) return;
 
-                        // CHỈ IN RA MÀN HÌNH NẾU NGÀY ĐÓ ĐÃ CÓ KẾT QUẢ THỰC TẾ (actual_g8) TỪ PYTHON
                         if (pred.actual_g8 !== undefined && pred.actual_g8 !== null && pred.actual_g8 !== "") {
                             const actualG8Str = String(pred.actual_g8).padStart(2, '0');
                             const isWin = pred.is_hit === true || pred.is_hit === "true";
@@ -135,16 +131,14 @@ function initPermanentDashboard() {
             });
 
             if (backtestDiv) {
-                backtestDiv.innerHTML = backtestHtml || `<div class="chart-tip">Dữ liệu đối chiếu chưa sẵn sàng...</div>`;
+                backtestDiv.innerHTML = backtestHtml || `<div class="chart-tip">Dữ liệu đối chiếu đang được đồng bộ...</div>`;
             }
         })
         .catch(err => console.error("Lỗi JSON:", err));
 
-    // KÍCH HOẠT VẼ BIỂU ĐỒ BẢN ĐỒ VÀ BẢNG
     renderAdvanceChart('recent', data);
     renderHistoricalTable();
 
-    // SỰ KIỆN TÌM KIẾM
     const searchInput = document.getElementById("table-search-input");
     const filterYearSelect = document.getElementById("table-filter-year");
     const updateTableFilters = () => {
@@ -163,7 +157,6 @@ function initPermanentDashboard() {
         filterYearSelect.addEventListener("change", updateTableFilters);
     }
 
-    // SỰ KIỆN PHÂN TRANG
     const btnTablePrev = document.getElementById("btn-table-prev");
     const btnTableNext = document.getElementById("btn-table-next");
     if (btnTablePrev && btnTableNext) {
@@ -176,13 +169,11 @@ function initPermanentDashboard() {
         });
     }
 
-    // SỰ KIỆN BIỂU ĐỒ
     const cboTimeframe = document.getElementById("cbo-timeframe");
     if (cboTimeframe) {
         cboTimeframe.addEventListener("change", (e) => { renderAdvanceChart(e.target.value, data); });
     }
 
-    // HOẠT ẢNH MƯỢT MÀ KHI ẨN/HIỆN ĐƯỜNG VẼ
     const btnDeselect = document.getElementById('btn-deselect-all');
     if (btnDeselect) {
         btnDeselect.addEventListener('click', () => {
@@ -205,7 +196,6 @@ function initPermanentDashboard() {
         });
     }
 
-    // SỰ KIỆN ZOOM/PAN
     document.getElementById("btn-zoom-in").addEventListener("click", () => { if (historyChart) historyChart.zoom(1.2); });
     document.getElementById("btn-zoom-out").addEventListener("click", () => { if (historyChart) historyChart.zoom(0.8); });
     document.getElementById("btn-zoom-reset").addEventListener("click", () => { if (historyChart) historyChart.resetZoom(); });
@@ -401,7 +391,8 @@ function renderHistoricalTable() {
 
     pageData.forEach(item => {
         const tr = document.createElement("tr");
-        const numericVal = item.g8;
+        
+        const numericVal = parseInt(item.g8);
         const chanLeStr = numericVal % 2 === 0 ? "Chẵn" : "Lẻ";
         const dauStr = Math.floor(numericVal / 10);
         const duoiStr = numericVal % 10;
@@ -412,7 +403,7 @@ function renderHistoricalTable() {
         tr.innerHTML = `
             <td style="font-weight: 600;">${item.dateStr}</td>
             <td style="color: var(--primary); font-weight: 700;">${item.dai}</td>
-            <td><span style="font-family: 'Fira Code', monospace; font-size: 1.05rem; font-weight: 700; color: var(--warning); background-color: rgba(245,158,11,0.1); padding: 0.15rem 0.5rem; border-radius: 0.25rem;">${String(item.g8).padStart(2, '0')}</span></td>
+            <td><span style="font-family: 'Fira Code', monospace; font-size: 1.05rem; font-weight: 700; color: var(--warning); background-color: rgba(245,158,11,0.1); padding: 0.15rem 0.5rem; border-radius: 0.25rem;">${String(numericVal).padStart(2, '0')}</span></td>
             <td>Đầu ${dauStr}, Đuôi ${duoiStr} (${chanLeStr})</td>
             <td>${trendBadge}</td>
         `;
@@ -424,10 +415,11 @@ function renderHistoricalTable() {
     document.getElementById("btn-table-next").disabled = endIndex >= filteredTableData.length;
 }
 
+// [FIXED]: Sửa lỗi đóng băng nút Menu Sidebar
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 if (btnToggleSidebar) {
     btnToggleSidebar.addEventListener('click', () => {
-        const sidebar = document.getElementById('app-sidebar');
+        const sidebar = document.querySelector('.app-sidebar');
         if (!sidebar) return;
         
         document.body.classList.add('sidebar-toggling');
@@ -449,6 +441,6 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
         initPermanentDashboard();
     } catch (err) {
-        console.warn("Lỗi khởi chạy: ", err);
+        console.warn("Lỗi khởi chạy môi trường: ", err);
     }
 });
