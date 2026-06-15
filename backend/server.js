@@ -94,38 +94,6 @@ const verifySecretKey = (req, res, next) => {
     const systemSecret =
         process.env.MLOPS_SECRET_KEY?.trim();
 
-logAction(
-    `[DEBUG] ENV JSON: ${JSON.stringify(systemSecret)}`
-);
-
-logAction(
-    `[DEBUG] CLIENT JSON: ${JSON.stringify(secretKey)}`
-);
-
-    logAction(
-        `[DEBUG] ENV Exists: ${
-            systemSecret !== undefined
-        }`
-    );
-
-    logAction(
-        `[DEBUG] ENV Length: ${
-            systemSecret?.length || 0
-        }`
-    );
-
-    logAction(
-        `[DEBUG] Client Length: ${
-            secretKey?.length || 0
-        }`
-    );
-
-    logAction(
-        `[DEBUG] Secret Match: ${
-            secretKey === systemSecret
-        }`
-    );
-
     if (!systemSecret) {
 
         logAction(
