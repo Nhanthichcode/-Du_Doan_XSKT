@@ -14,7 +14,7 @@ jobs:
         run: |
           echo "${#SECRET}"
         env:
-    SECRET: ${{ secrets.MLOPS_SECRET_KEY }}
+          SECRET: ${{ secrets.MLOPS_SECRET_KEY }}
       - name: Gui tin hieu Ping toi Render
         run: |
           curl -X GET "https://du-doan-xskt.onrender.com/ping" \
