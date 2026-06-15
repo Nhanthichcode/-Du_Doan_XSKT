@@ -3,7 +3,7 @@ import joblib
 import re
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # 1. ĐỊNH NGHĨA ĐƯỜNG DẪN CHUẨN
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -12,8 +12,9 @@ OUTPUT_DIR = os.path.join(BASE_DIR, '..', 'frontend', 'js')
 HISTORY_FILE = os.path.join(OUTPUT_DIR, 'history_predictions.json')
 
 def log_action(message):
-    timestamp = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-    log_entry = f"[{timestamp}] [PYTHON - du_doan] {message}\n"
+    # Ép giờ Việt Nam chuẩn xác cho file Nhật ký hệ thống
+    vn_timestamp = (datetime.utcnow() + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S')
+    log_entry = f"[{vn_timestamp}] [PYTHON - du_doan] {message}\n"
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
             f.write(log_entry)
@@ -33,16 +34,28 @@ def predict_all_today_channels(data_file, model_file):
         model = joblib.load(model_file)
         df = pd.read_csv(data_file, dtype=str)
         
-        today_weekday = datetime.now().weekday() + 2
-        df['Date_DT'] = pd.to_datetime(df['Ngày'], dayfirst=True)
+        # --- ĐỒNG BỘ MÚI GIỜ GMT+7 VÀ PHÂN CHIA CHIẾN LƯỢC CUỘN NGÀY ---
+        vn_now = datetime.utcnow() + timedelta(hours=7)
+        
+        # Nếu chạy sau 17h00 chiều (như mốc 23h40 của bạn), kết quả hôm nay đã ra, ta phải dự đoán cho NGÀY MAI
+        if vn_now.hour >= 17:
+            target_date = vn_now + timedelta(days=1)
+            log_action(f"🌙 Hệ thống chạy vào đêm muộn ({vn_now.strftime('%H:%M')}). Tự động cuộn lịch sang NGÀY MAI ({target_date.strftime('%d/%m/%Y')}) để dự báo.")
+        else:
+            target_date = vn_now
+            log_action(f"☀️ Hệ thống chạy ban ngày ({vn_now.strftime('%H:%M')}). Tiến hành dự báo cho NGÀY HÔM NAY ({target_date.strftime('%d/%m/%Y')}).")
+            
+        target_weekday = target_date.weekday() + 2  # Quy đổi ra Thứ chuẩn Việt Nam (Thứ 2 -> Chủ Nhật là 2 -> 8)
+        
+        df['Date_DT'] = pd.to_datetime(df['Ngày'], format='%d/%m/%Y', errors='coerce')
         df['Thu'] = df['Date_DT'].dt.dayofweek + 2
 
-        # [SỬA LỖI ĐÙNG ĐÀI]: Tìm ngày có cùng thứ với hôm nay mà gần nhất trong lịch sử, lấy chính xác các đài của ngày đó (Tránh vơ vét 10 đài)
-        max_date_for_weekday = df[df['Thu'] == today_weekday]['Date_DT'].max()
-        today_channels = df[(df['Thu'] == today_weekday) & (df['Date_DT'] == max_date_for_weekday)]['Đài'].unique().tolist()
+        # Tìm ngày có cùng thứ gần nhất trong lịch sử để bốc chính xác các đài quay của ngày mục tiêu
+        max_date_for_weekday = df[df['Thu'] == target_weekday]['Date_DT'].max()
+        today_channels = df[(df['Thu'] == target_weekday) & (df['Date_DT'] == max_date_for_weekday)]['Đài'].unique().tolist()
 
         if not today_channels:
-            log_action(f"⚠️ Không tìm thấy đài mở thưởng Thứ {today_weekday}")
+            log_action(f"⚠️ Không tìm thấy lịch sử mở thưởng của Thứ {target_weekday} để làm căn cứ.")
             return
 
         def get_day_lotos(row):
@@ -51,12 +64,12 @@ def predict_all_today_channels(data_file, model_file):
             return [n[-2:] for n in nums]
 
         output_data = {
-            "thu": today_weekday,
-            "ngay_du_doan": datetime.now().strftime('%d/%m/%Y'),
+            "thu": target_weekday,
+            "ngay_du_doan": target_date.strftime('%d/%m/%Y'),
             "results": []
         }
 
-        # --- Vòng lặp dự đoán ---
+        # --- Vòng lặp tính toán đặc trưng và toán dự đoán AI ---
         for dai_name in today_channels:
             df_dai = df[df['Đài'] == dai_name].sort_values('Date_DT').reset_index(drop=True)
             if len(df_dai) < 35: continue
@@ -76,7 +89,7 @@ def predict_all_today_channels(data_file, model_file):
                     gap += 1
                 
                 current_features.append({
-                    'So': n, 'Thu': today_weekday, 'Gap': gap,
+                    'So': n, 'Thu': target_weekday, 'Gap': gap,
                     'F5': sum(1 for d in draw_results[-5:] if s_num in d),
                     'F10': sum(1 for d in draw_results[-10:] if s_num in d),
                     'F30': sum(1 for d in draw_results[-30:] if s_num in d),
@@ -95,8 +108,8 @@ def predict_all_today_channels(data_file, model_file):
                 dai_result["predictions"].append({"so": f"{int(row['So']):02d}", "xac_suat": round(float(row['Xac_Suat']) * 100, 2)})
             output_data["results"].append(dai_result)
 
-        # --- Gộp vào tệp Lịch Sử Đối Chiếu ---
-        date_key = datetime.now().strftime('%d/%m/%Y')
+        # --- Gộp kết quả vào kho tệp JSON Lịch Sử ---
+        date_key = target_date.strftime('%d/%m/%Y')
         history = {}
         
         if os.path.exists(HISTORY_FILE):
@@ -104,16 +117,20 @@ def predict_all_today_channels(data_file, model_file):
                 try: history = json.load(f)
                 except: history = {}
 
-        # Ghi dự đoán của ngày hôm nay vào dict
-        if date_key not in history:
-            history[date_key] = output_data["results"]
-            log_action(f"✅ Đã thêm dự đoán ngày {date_key} vào lịch sử.")
+        # Ghi nhận bộ dự đoán mới dưới nhãn ngày mai
+        history[date_key] = output_data["results"]
+        log_action(f"✅ Đã lưu bộ dự đoán của ngày {date_key} vào tệp lịch sử.")
 
-        # [TỰ ĐỘNG ĐỐI CHIẾU]: Dò quét các ngày trước đó, nếu có kết quả thật thì bổ sung vào JSON
-        log_action("🔄 Đang quét đối chiếu và đồng bộ kết quả thực tế...")
-        for past_date, stations_list in history.items():
+        # [ĐỐI SOÁT THÔNG MINH]: Dò tìm kết quả thực tế từ file tổng hợp CSV
+        log_action("🔄 Đang quét đối chiếu và vá kết quả thực tế cho dải ngày cũ...")
+        for past_date, stations_list in list(history.items()):
             df_date = df[df['Ngày'] == past_date]
+            
+            # Nếu ngày này chưa có kết quả quay thưởng thật trong file CSV (Ví dụ ngày mai) -> Dọn sạch trường check trúng
             if df_date.empty:
+                for station in stations_list:
+                    station.pop('actual_g8', None)
+                    station.pop('is_hit', None)
                 continue 
                 
             for station in stations_list:
@@ -126,16 +143,15 @@ def predict_all_today_channels(data_file, model_file):
                     nums_g8 = re.findall(r'\d+', val_g8)
                     if nums_g8:
                         actual_g8 = f"{int(nums_g8[0][-2:]):02d}"
-                        # Cập nhật kết quả vào JSON
                         station['actual_g8'] = actual_g8
                         pred_numbers = [p['so'] for p in station.get('predictions', [])]
                         station['is_hit'] = actual_g8 in pred_numbers
 
-        # Lưu lại JSON
+        # Xuất file JSON
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(history, f, ensure_ascii=False, indent=2)
             
-        log_action(f"🎉 Hoàn tất cập nhật đối chiếu tại: {HISTORY_FILE}")
+        log_action(f"🎉 Hoàn tất chuỗi xử lý đối soát tại: {HISTORY_FILE}")
 
     except Exception as e:
         log_action(f"❌ Lỗi nghiêm trọng: {str(e)}")
