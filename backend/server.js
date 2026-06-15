@@ -67,13 +67,15 @@ app.use('/api/', apiLimiter);
 
 const verifySecretKey = (req, res, next) => {
     const secretKey = req.headers['x-secret-key'] || req.query.secret;
-    const systemSecret = process.env.MLOPS_SECRET_KEY || "ChucNangBaoMatMLOps2026";
-
+    const systemSecret = process.env.MLOPS_SECRET_KEY;
+if(systemSecret===undefined) {
+    logAction(`⚠️ Cảnh báo bảo mật: MLOPS_SECRET_KEY chưa được thiết lập trong biến môi trường! Hãy đảm bảo rằng bạn đã cấu hình đúng để bảo vệ API kích hoạt luồng.`);
+}
     if (!secretKey || secretKey !== systemSecret) {
         logAction(`⚠️ Cảnh báo bảo mật: Một IP lạ đang cố tình tấn công/gọi vào API kích hoạt luồng.`);
         return res.status(403).json({ 
             success: false, 
-            error: "Truy cập bị từ chối. Bạn không có mã bảo mật kích hoạt hệ thống." 
+            error: `Truy cập bị từ chối IP: ${req.ip} / secret: @@@@_${secretKey}/${systemSecret}_@@@@ Bạn không có mã bảo mật kích hoạt hệ thống.` 
         });
     }
     next(); 
