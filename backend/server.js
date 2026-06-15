@@ -66,19 +66,63 @@ app.get('/', (req, res) => {
 app.use('/api/', apiLimiter);
 
 const verifySecretKey = (req, res, next) => {
-    const secretKey = req.headers['x-secret-key'] || req.query.secret;
-    const systemSecret = process.env.MLOPS_SECRET_KEY;
-if(systemSecret===undefined) {
-    logAction(`⚠️ Cảnh báo bảo mật: MLOPS_SECRET_KEY chưa được thiết lập trong biến môi trường! Hãy đảm bảo rằng bạn đã cấu hình đúng để bảo vệ API kích hoạt luồng.`);
-}
-    if (!secretKey || secretKey !== systemSecret) {
-        logAction(`⚠️ Cảnh báo bảo mật: Một IP lạ đang cố tình tấn công/gọi vào API kích hoạt luồng.`);
-        return res.status(403).json({ 
-            success: false, 
-            error: `Truy cập bị từ chối IP: ${req.ip} / secret: @@@@_${secretKey}/${systemSecret}_@@@@ Bạn không có mã bảo mật kích hoạt hệ thống.` 
+
+    const secretKey =
+        req.headers['x-secret-key'] ||
+        req.query.secret;
+
+    const systemSecret =
+        process.env.MLOPS_SECRET_KEY;
+
+    logAction(
+        `[DEBUG] ENV Exists: ${
+            systemSecret !== undefined
+        }`
+    );
+
+    logAction(
+        `[DEBUG] ENV Length: ${
+            systemSecret?.length || 0
+        }`
+    );
+
+    logAction(
+        `[DEBUG] Client Length: ${
+            secretKey?.length || 0
+        }`
+    );
+
+    logAction(
+        `[DEBUG] Secret Match: ${
+            secretKey === systemSecret
+        }`
+    );
+
+    if (!systemSecret) {
+
+        logAction(
+            "⚠️ MLOPS_SECRET_KEY chưa được cấu hình"
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "Server chưa cấu hình secret"
         });
     }
-    next(); 
+
+    if (!secretKey || secretKey !== systemSecret) {
+
+        logAction(
+            `⚠️ Truy cập trái phép từ IP ${req.ip}`
+        );
+
+        return res.status(403).json({
+            success: false,
+            error: "Sai mã bảo mật"
+        });
+    }
+
+    next();
 };
 
 const initPythonEnvironment = () => {
