@@ -10,12 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug secret length
-        run: |
-          echo "${#SECRET}"
-        env:
-          SECRET: ${{ secrets.MLOPS_SECRET_KEY }}
       - name: Gui tin hieu Ping toi Render
+        env:
+          MLOPS_KEY: ${{ secrets.MLOPS_SECRET_KEY }}
         run: |
           curl -X GET "https://du-doan-xskt.onrender.com/ping" \
-          -H "X-Secret-Key: ${{ secrets.MLOPS_SECRET_KEY }}"
+          -H "X-Secret-Key: $MLOPS_KEY"
