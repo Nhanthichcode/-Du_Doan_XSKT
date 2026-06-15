@@ -1,0 +1,55 @@
+{
+  "15/06/2026": [
+    {
+      "dai": "Cà Mau",
+      "predictions": [
+        {
+          "so": "99",
+          "xac_suat": 59.45
+        },
+        {
+          "so": "16",
+          "xac_suat": 57.24
+        },
+        {
+          "so": "58",
+          "xac_suat": 56.66
+        }
+      ]
+    },
+    {
+      "dai": "Hồ Chí Minh",
+      "predictions": [
+        {
+          "so": "85",
+          "xac_suat": 58.83
+        },
+        {
+          "so": "65",
+          "xac_suat": 56.25
+        },
+        {
+          "so": "96",
+          "xac_suat": 56.02
+        }
+      ]
+    },
+    {
+      "dai": "Đồng Tháp",
+      "predictions": [
+        {
+          "so": "54",
+          "xac_suat": 56.53
+        },
+        {
+          "so": "66",
+          "xac_suat": 56.14
+        },
+        {
+          "so": "47",
+          "xac_suat": 56.0
+        }
+      ]
+    }
+  ]
+}
