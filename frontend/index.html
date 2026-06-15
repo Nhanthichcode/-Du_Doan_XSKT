@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -9,20 +9,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
-    <!-- Chart.js và các plugin điều khiển vuốt, zoom -->
+    <!-- Ép tải lại CSS mới nhất chống cache -->
+    <link class="css-st" rel="stylesheet" href="css/style.css?v=2.1">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
-    <!-- Nhúng tệp CSS định dạng giao diện tĩnh -->
-    <link rel="stylesheet" href="css/style.css">
-    
     <style>
-        /* Đảm bảo giao diện hiển thị mượt mà */
+        /* Đảm bảo giao diện hiển thị ngay lập tức, không bị ẩn */
         #main-app-wrapper { 
             display: block !important; 
         }
         
+        /* Tối ưu hóa vùng hiển thị bảng dữ liệu trên thiết bị di động */
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -32,67 +32,52 @@
 </head>
 <body>
 
-    <!-- WRAPPER GIAO DIỆN CHÍNH -->
     <div id="main-app-wrapper">
         
-        <!-- THANH ĐẦU TRANG -->
         <header class="app-header">
             <div class="header-left">
-                <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Bảng thông tin">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                <h1 class="app-title">Phân Tích Lịch Sử & Dự Đoán AI XSMN</h1>
+                <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Bảng thông tin">Menu</button>
+                <h1 class="app-title">Hệ Thống Phân Tích & Dự Đoán AI XSMN</h1>
             </div>
             <div class="app-meta">
                 <span class="pulse-indicator"></span>
-                MLOps Pipeline: <span style="font-weight: 700; color: var(--success);">ONLINE</span>
+                Hệ thống: <span class="text-success" style="font-weight: 700;">ĐỒNG BỘ HOÀN TẤT</span>
                 <span style="color: var(--border-color)">|</span>
-                Hôm nay: <span id="lbl-time" style="font-weight: 600; color: var(--text-main);">Đang nạp...</span>
+                Cập nhật: <span id="lbl-time" style="font-weight: 600; color: var(--text-main);">Đang cập nhật...</span>
             </div>
         </header>
 
-        <!-- BỐ CỤC KHUNG LÀM VIỆC CHÍNH -->
         <div id="app-container" class="app-layout">
             
-            <!-- SIDEBAR (DỰ ĐOÁN & BACKTEST) -->
             <aside class="app-sidebar">
                 
-                <!-- THÔNG TIN DỰ BÁO CHI TIẾT SỐ VÀNG TIẾP THEO -->
                 <div class="section-box">
                     <h3 class="section-title text-success">
                         <span>Số Vàng Tiếp Theo</span>
                         <span id="lbl-pred-date" style="font-size: 0.75rem; color: var(--text-muted)">Đang tải...</span>
                     </h3>
-                    
                     <div id="prediction-list" class="sidebar-list">
                         <div class="chart-tip">Đang đồng bộ dữ liệu dự đoán từ máy chủ...</div>
                     </div>
                 </div>
 
-                <!-- ĐỐI CHIẾU KỲ TRƯỚC VỚI 3 SỐ DỰ ĐOÁN -->
                 <div class="section-box">
                     <h3 class="section-title text-danger">
                         <span>Đối Chiếu Kỳ Trước</span>
-                        <span style="font-size: 0.75rem; color: var(--text-muted)">Lịch sử đối chiếu</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted)">Kết quả gần nhất</span>
                     </h3>
                     <div id="backtest-list" class="sidebar-list">
-                        <div class="chart-tip">Đang nạp dữ liệu đối chiếu từ hệ thống...</div>
+                        <div class="chart-tip">Đang nạp dữ liệu đối chiếu...</div>
                     </div>
                 </div>
 
             </aside>
 
-            <!-- MAIN CONTENT WORKSPACE -->
             <main class="app-main">
                 
-                <!-- BIỂU ĐỒ TRỰC QUAN HÓA -->
                 <div class="chart-box">
                     <div class="chart-header">
-                        <h3 class="chart-title">Biểu Đồ Xu Hướng Giải 8 XSMN Theo Thời Gian (Y: 00-99 Cố Định)</h3>
+                        <h3 class="chart-title">Biểu Đồ Xu Hướng Giải 8 XSMN (Y: 00-99 Cố Định)</h3>
                         
                         <div class="toolbar-panel">
                             <div class="filter-bar">
@@ -127,51 +112,44 @@
                             </div>
 
                             <div class="action-buttons">
-                                <button id="btn-select-all" class="btn btn-secondary">✓ Chọn Tất Cả</button>
-                                <button id="btn-deselect-all" class="btn btn-danger-outline">✕ Bỏ Chọn Tất Cả</button>
+                                <button id="btn-select-all" class="btn btn-secondary">Chọn Tất Cả</button>
+                                <button id="btn-deselect-all" class="btn btn-danger-outline">Bỏ Chọn Tất Cả</button>
                             </div>
                         </div>
                     </div>
 
                     <div class="chart-tip">
-                        <strong>Tính năng ghim tọa độ:</strong> Trục Y luôn được giữ **Cố Định từ 00 đến 99** để phản ánh chính xác xu hướng con số. Bạn có thể kéo qua/lại hoặc vuốt chạm để di chuyển thời gian (Trục X) thoải mái.
+                        Trục Y luôn được giữ Cố Định từ 00 đến 99 để phản ánh chính xác biên độ. Bạn có thể kéo qua/lại hoặc cuộn chuột để di chuyển dòng thời gian.
                     </div>
                     
                     <div class="chart-container">
                         <canvas id="historyLineChart"></canvas>
                     </div>
 
-                    <!-- BỘ ĐIỀU HƯỚNG NÚT BẤM CHO BIỂU ĐỒ -->
                     <div class="chart-nav-controls">
                         <div class="nav-group">
-                            <span class="nav-label">Thu Phóng Trục Thời Gian:</span>
+                            <span class="nav-label">Thu Phóng Thời Gian:</span>
                             <button id="btn-zoom-in" class="btn-nav" title="Phóng to">+</button>
                             <button id="btn-zoom-out" class="btn-nav" title="Thu nhỏ">-</button>
-                            <button id="btn-zoom-reset" class="btn-nav" style="width: auto; padding: 0 0.5rem; font-size: 0.75rem;" title="Thiết lập lại">Khôi phục biểu đồ</button>
+                            <button id="btn-zoom-reset" class="btn-nav" style="width: auto; padding: 0 0.5rem; font-size: 0.75rem;">Mặc Định</button>
                         </div>
 
                         <div class="nav-group">
-                            <span class="nav-label">Di chuyển Trục X (Trái/Phải):</span>
+                            <span class="nav-label">Di chuyển Trục X:</span>
                             <button id="btn-pan-left" class="btn-nav" title="Kéo qua trái">◀</button>
                             <button id="btn-pan-right" class="btn-nav" title="Kéo qua phải">▶</button>
-                        </div>
-
-                        <div class="nav-group">
-                            <span class="nav-label">Cố định Trục Y:</span>
-                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--success); padding: 0 0.5rem;">[0 - 99 KHÓA]</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- BẢNG LỊCH SỬ DANH SÁCH TOÀN BỘ DỮ LIỆU LỊCH SỬ -->
                 <div class="history-list-box">
                     <div class="chart-header">
-                        <h3 class="chart-title">Tra Cứu Danh Sách Toàn Bộ Dữ Liệu Kỳ Trước (Lịch Sử 20 Năm)</h3>
+                        <h3 class="chart-title">Tra Cứu Danh Sách Toàn Bộ Dữ Liệu</h3>
                     </div>
 
                     <div class="table-controls">
                         <div class="table-search-panel">
-                            <input type="text" id="table-search-input" class="input-search" placeholder="Tìm đài hoặc số đề (ví dụ: 'Tiền Giang', '81')...">
+                            <input type="text" id="table-search-input" class="input-search" placeholder="Tìm đài hoặc số (VD: Tiền Giang, 81)...">
                             <select id="table-filter-year" class="input-search" style="max-width: 180px;">
                                 <option value="all">Tất Cả Các Năm</option>
                                 <option value="2026">Năm 2026</option>
@@ -181,19 +159,8 @@
                                 <option value="2022">Năm 2022</option>
                                 <option value="2021">Năm 2021</option>
                                 <option value="2020">Năm 2020</option>
-                                <option value="2019">Năm 2019</option>
-                                <option value="2018">Năm 2018</option>
-                                <option value="2017">Năm 2017</option>
-                                <option value="2016">Năm 2016</option>
                                 <option value="2015">Năm 2015</option>
-                                <option value="2014">Năm 2014</option>
-                                <option value="2013">Năm 2013</option>
-                                <option value="2012">Năm 2012</option>
-                                <option value="2011">Năm 2011</option>
                                 <option value="2010">Năm 2010</option>
-                                <option value="2009">Năm 2009</option>
-                                <option value="2008">Năm 2008</option>
-                                <option value="2007">Năm 2007</option>
                                 <option value="2006">Năm 2006</option>
                             </select>
                         </div>
@@ -203,52 +170,25 @@
                         <table class="datatable">
                             <thead>
                                 <tr>
-                                    <th>Thời Gian (Ngày)</th>
-                                    <th>Tên Đài Khai Thác</th>
-                                    <th>Giải 8 Thực Tế</th>
-                                    <th>Nhóm Số</th>
-                                    <th>Tính Chất Xu Hướng</th>
+                                    <th>Thời Gian</th>
+                                    <th>Đài Khai Thác</th>
+                                    <th>Giải 8</th>
+                                    <th>Đầu/Đuôi</th>
+                                    <th>Tính Chất</th>
                                 </tr>
                             </thead>
                             <tbody id="historical-table-rows">
-                                <tr><td colspan="5" style="text-align: center; padding: 2rem;">Đang đồng bộ dữ liệu...</td></tr>
+                                <tr><td colspan="5" style="text-align: center; padding: 1rem;">Đang đồng bộ dữ liệu...</td></tr>
                             </tbody>
                         </table>
                     </div>
 
                     <div class="table-pagination-panel">
-                        <span id="table-entries-info">Đang hiển thị bản ghi từ ... đến ... trong số ... bản ghi được tìm thấy</span>
+                        <span id="table-entries-info">Đang tải...</span>
                         <div style="display: flex; gap: 0.5rem;">
-                            <button id="btn-table-prev" class="btn btn-secondary">◀ Kỳ Trước</button>
-                            <button id="btn-table-next" class="btn btn-secondary">Kỳ Tiếp ➔</button>
+                            <button id="btn-table-prev" class="btn btn-secondary">◀ Trang Trước</button>
+                            <button id="btn-table-next" class="btn btn-secondary">Trang Sau ▶</button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- MLOPS TERMINAL MONITOR -->
-                <div class="terminal-box">
-                    <div class="terminal-header">
-                        <div class="terminal-dots">
-                            <div class="dot dot-red"></div>
-                            <div class="dot dot-yellow"></div>
-                            <div class="dot dot-green"></div>
-                        </div>
-                        <div class="terminal-title">system_log.txt - MLOps Monitor Console</div>
-                    </div>
-                    
-                    <div id="terminal-logs" class="terminal-body">
-                        <div class="log-entry log-info">Đang liên kết với tệp log máy chủ...</div>
-                    </div>
-
-                    <!-- PIPELINE TRIGGER WORKFLOW CONTROLLER -->
-                    <div class="pipeline-trigger">
-                        <div class="trigger-info">
-                            <span class="trigger-title">Kích hoạt Quy trình Robot MLOps</span>
-                            <span class="trigger-desc">Tự động hóa toàn chuỗi: Cào dữ liệu ➔ Trích xuất ➔ Huấn luyện AI ➔ Dự báo ➔ Đẩy dữ liệu lên GitHub & Log.</span>
-                        </div>
-                        <button id="btn-trigger-pipeline" class="btn btn-primary">
-                            Khởi Chạy MLOps Pipeline
-                        </button>
                     </div>
                 </div>
 
@@ -256,8 +196,8 @@
         </div>
     </div>
 
-    <!-- LIÊN KẾT NẠP TÀI NGUYÊN HOẠT ĐỘNG THỰC TẾ -->
-    <script src="js/dashboard_data.js"></script>
-    <script src="js/app.js"></script>
+    <!-- SỬ DỤNG ?v= thời gian để ép GitHub Pages luôn nạp code JS mới nhất -->
+    <script src="js/dashboard_data.js?v=2.1"></script>
+    <script src="js/app.js?v=2.1"></script>
 </body>
 </html>
