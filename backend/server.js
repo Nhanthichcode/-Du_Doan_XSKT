@@ -72,7 +72,15 @@ const verifySecretKey = (req, res, next) => {
         req.query.secret;
 
     const systemSecret =
-        process.env.MLOPS_SECRET_KEY;
+        process.env.MLOPS_SECRET_KEY?.trim();
+
+logAction(
+  `[DEBUG] ENV JSON: ${JSON.stringify(systemSecret)}`
+);
+
+logAction(
+  `[DEBUG] CLIENT JSON: ${JSON.stringify(secretKey)}`
+);
 
     logAction(
         `[DEBUG] ENV Exists: ${
