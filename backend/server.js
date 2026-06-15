@@ -234,7 +234,7 @@ const runDailyMLOpsPipeline = async () => {
         // NẾU CÓ DỮ LIỆU MỚI -> KÍCH HOẠT TOÀN BỘ LUỒNG TÍNH TOÁN
         logAction("🔥 Phát hiện dữ liệu mới! Kích hoạt toàn bộ luồng xử lý AI & Đóng gói...");
         await runPythonScript('chuyen_thanh_du_lieu_huan_luyen.py');
-        await runPythonScript('master_ai.py');        
+        // await runPythonScript('master_ai.py');        
         await runPythonScript('du_doan.py'); 
         await runPythonScript('build_js_data.py');
         
