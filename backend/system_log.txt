@@ -1122,3 +1122,137 @@ The system cannot find the path specified.
 [15/06/2026 06:12:43] [PYTHON - build_data] Bắt đầu đóng gói dữ liệu tĩnh JS...
 [15/06/2026 06:12:55] [PYTHON - build_data] 🎉 Đã tạo thành công file tĩnh đồ thị tại: /opt/render/project/src/backend/../frontend/js/dashboard_data.js
 [13:12:56 15/6/2026] [NODE] 🚀 [GITHUB] Đang chuẩn bị đồng bộ toàn bộ dữ liệu lên GitHub...
+[13:40:39 15/6/2026] [NODE] [AUTO-START] Hệ thống bắt đầu nạp cấu hình chạy thử nghiệm tự động...
+[13:40:39 15/6/2026] [NODE] 🛠️ [MÔI TRƯỜNG] Đang kiểm tra và đồng bộ nhanh các thư viện AI qua PIP...
+[13:40:40 15/6/2026] [NODE] ⚠️ Phát hiện một truy cập trái phép cố tình vào gốc định tuyến / của Render.
+[13:40:48 15/6/2026] [NODE] ⚠️ Phát hiện một truy cập trái phép cố tình vào gốc định tuyến / của Render.
+[13:42:43 15/6/2026] [NODE] ✅ [MÔI TRƯỜNG] Các thư viện Python đã được nạp sẵn sàng vào hệ thống!
+[13:42:43 15/6/2026] [NODE] [AUTO-START] Kích hoạt chuỗi quy trình chính (Pipeline Check)...
+[13:42:43 15/6/2026] [NODE] 
+======================================================================
+[13:42:43 15/6/2026] [NODE] ⚡ [START WORKFLOW] KÍCH HOẠT CHUỖI QUY TRÌNH MLOPS TỰ ĐỘNG
+[13:42:43 15/6/2026] [NODE] ======================================================================
+[13:42:43 15/6/2026] [NODE] 🛠️ Robot đang kích hoạt chạy tiến trình AI: [cao_du_lieu_tu_dong.py]...
+[13:43:03 15/6/2026] [NODE] 📊 Kết quả phân tích: Đã cập nhật thêm 16 bản ghi mới.
+[13:43:03 15/6/2026] [NODE] 🔥 Phát hiện dữ liệu mới! Kích hoạt toàn bộ luồng xử lý AI & Đóng gói...
+[13:43:03 15/6/2026] [NODE] 🛠️ Robot đang kích hoạt chạy tiến trình AI: [chuyen_thanh_du_lieu_huan_luyen.py]...
+[15/06/2026 06:43:06] [PYTHON - chuyen_du_lieu] 🚀 Khởi chạy tiến trình trích xuất đặc trưng AI (Chế độ bảo vệ RAM)...
+[15/06/2026 06:43:06] [PYTHON - chuyen_du_lieu] 📊 Đang nạp cơ sở dữ liệu CSV vào bộ nhớ...
+[15/06/2026 06:43:06] [PYTHON - chuyen_du_lieu] 📂 Tổng hợp phát hiện 21 đài cần phân tích chu kỳ lịch sử.
+[15/06/2026 06:43:06] [PYTHON - chuyen_du_lieu] 🔄 [1/21] Đang tính toán chu kỳ cho Đài: An Giang...
+[15/06/2026 06:43:07] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài An Giang: 300/1017 kỳ (29.5%)
+[15/06/2026 06:43:08] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài An Giang: 600/1017 kỳ (59.0%)
+[15/06/2026 06:43:09] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài An Giang: 900/1017 kỳ (88.5%)
+[15/06/2026 06:43:11] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98700 dòng của đài An Giang xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:11] [PYTHON - chuyen_du_lieu] 🔄 [2/21] Đang tính toán chu kỳ cho Đài: Bình Dương...
+[15/06/2026 06:43:12] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Dương: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:13] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Dương: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:13] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Dương: 900/1019 kỳ (88.3%)
+[15/06/2026 06:43:17] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Bình Dương xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:17] [PYTHON - chuyen_du_lieu] 🔄 [3/21] Đang tính toán chu kỳ cho Đài: Bình Phước...
+[15/06/2026 06:43:18] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Phước: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:18] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Phước: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:19] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Phước: 900/1019 kỳ (88.3%)
+[15/06/2026 06:43:21] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Bình Phước xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:21] [PYTHON - chuyen_du_lieu] 🔄 [4/21] Đang tính toán chu kỳ cho Đài: Bình Thuận...
+[15/06/2026 06:43:22] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Thuận: 300/1017 kỳ (29.5%)
+[15/06/2026 06:43:23] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Thuận: 600/1017 kỳ (59.0%)
+[15/06/2026 06:43:24] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bình Thuận: 900/1017 kỳ (88.5%)
+[15/06/2026 06:43:26] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98700 dòng của đài Bình Thuận xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:26] [PYTHON - chuyen_du_lieu] 🔄 [5/21] Đang tính toán chu kỳ cho Đài: Bạc Liêu...
+[15/06/2026 06:43:27] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bạc Liêu: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:28] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bạc Liêu: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:29] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bạc Liêu: 900/1019 kỳ (88.3%)
+[15/06/2026 06:43:31] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Bạc Liêu xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:31] [PYTHON - chuyen_du_lieu] 🔄 [6/21] Đang tính toán chu kỳ cho Đài: Bến Tre...
+[15/06/2026 06:43:32] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bến Tre: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:33] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bến Tre: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:33] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Bến Tre: 900/1019 kỳ (88.3%)
+[15/06/2026 06:43:36] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Bến Tre xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:36] [PYTHON - chuyen_du_lieu] 🔄 [7/21] Đang tính toán chu kỳ cho Đài: Cà Mau...
+[15/06/2026 06:43:36] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Cà Mau: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:37] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Cà Mau: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:38] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Cà Mau: 900/1019 kỳ (88.3%)
+[15/06/2026 06:43:40] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Cà Mau xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:40] [PYTHON - chuyen_du_lieu] 🔄 [8/21] Đang tính toán chu kỳ cho Đài: Cần Thơ...
+[15/06/2026 06:43:41] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Cần Thơ: 300/1018 kỳ (29.5%)
+[15/06/2026 06:43:42] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Cần Thơ: 600/1018 kỳ (58.9%)
+[15/06/2026 06:43:42] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Cần Thơ: 900/1018 kỳ (88.4%)
+[15/06/2026 06:43:44] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98800 dòng của đài Cần Thơ xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:45] [PYTHON - chuyen_du_lieu] 🔄 [9/21] Đang tính toán chu kỳ cho Đài: Hậu Giang...
+[15/06/2026 06:43:45] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hậu Giang: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:46] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hậu Giang: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:46] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hậu Giang: 900/1019 kỳ (88.3%)
+[15/06/2026 06:43:48] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Hậu Giang xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:48] [PYTHON - chuyen_du_lieu] 🔄 [10/21] Đang tính toán chu kỳ cho Đài: Hồ Chí Minh...
+[15/06/2026 06:43:49] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hồ Chí Minh: 300/2038 kỳ (14.7%)
+[15/06/2026 06:43:50] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hồ Chí Minh: 600/2038 kỳ (29.4%)
+[15/06/2026 06:43:50] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hồ Chí Minh: 900/2038 kỳ (44.2%)
+[15/06/2026 06:43:51] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hồ Chí Minh: 1200/2038 kỳ (58.9%)
+[15/06/2026 06:43:52] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hồ Chí Minh: 1500/2038 kỳ (73.6%)
+[15/06/2026 06:43:52] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Hồ Chí Minh: 1800/2038 kỳ (88.3%)
+[15/06/2026 06:43:57] [PYTHON - chuyen_du_lieu] 💾 Đã xả 200800 dòng của đài Hồ Chí Minh xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:43:57] [PYTHON - chuyen_du_lieu] 🔄 [11/21] Đang tính toán chu kỳ cho Đài: Kiên Giang...
+[15/06/2026 06:43:58] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Kiên Giang: 300/1019 kỳ (29.4%)
+[15/06/2026 06:43:59] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Kiên Giang: 600/1019 kỳ (58.9%)
+[15/06/2026 06:43:59] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Kiên Giang: 900/1019 kỳ (88.3%)
+[15/06/2026 06:44:02] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Kiên Giang xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:02] [PYTHON - chuyen_du_lieu] 🔄 [12/21] Đang tính toán chu kỳ cho Đài: Long An...
+[15/06/2026 06:44:02] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Long An: 300/1019 kỳ (29.4%)
+[15/06/2026 06:44:03] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Long An: 600/1019 kỳ (58.9%)
+[15/06/2026 06:44:04] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Long An: 900/1019 kỳ (88.3%)
+[15/06/2026 06:44:06] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Long An xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:06] [PYTHON - chuyen_du_lieu] 🔄 [13/21] Đang tính toán chu kỳ cho Đài: Sóc Trăng...
+[15/06/2026 06:44:06] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Sóc Trăng: 300/1018 kỳ (29.5%)
+[15/06/2026 06:44:07] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Sóc Trăng: 600/1018 kỳ (58.9%)
+[15/06/2026 06:44:08] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Sóc Trăng: 900/1018 kỳ (88.4%)
+[15/06/2026 06:44:11] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98800 dòng của đài Sóc Trăng xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:11] [PYTHON - chuyen_du_lieu] 🔄 [14/21] Đang tính toán chu kỳ cho Đài: Tiền Giang...
+[15/06/2026 06:44:12] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Tiền Giang: 300/1019 kỳ (29.4%)
+[15/06/2026 06:44:12] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Tiền Giang: 600/1019 kỳ (58.9%)
+[15/06/2026 06:44:13] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Tiền Giang: 900/1019 kỳ (88.3%)
+[15/06/2026 06:44:15] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Tiền Giang xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:15] [PYTHON - chuyen_du_lieu] 🔄 [15/21] Đang tính toán chu kỳ cho Đài: Trà Vinh...
+[15/06/2026 06:44:16] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Trà Vinh: 300/1015 kỳ (29.6%)
+[15/06/2026 06:44:16] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Trà Vinh: 600/1015 kỳ (59.1%)
+[15/06/2026 06:44:17] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Trà Vinh: 900/1015 kỳ (88.7%)
+[15/06/2026 06:44:19] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98500 dòng của đài Trà Vinh xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:19] [PYTHON - chuyen_du_lieu] 🔄 [16/21] Đang tính toán chu kỳ cho Đài: Tây Ninh...
+[15/06/2026 06:44:20] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Tây Ninh: 300/1017 kỳ (29.5%)
+[15/06/2026 06:44:21] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Tây Ninh: 600/1017 kỳ (59.0%)
+[15/06/2026 06:44:21] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Tây Ninh: 900/1017 kỳ (88.5%)
+[15/06/2026 06:44:24] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98700 dòng của đài Tây Ninh xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:24] [PYTHON - chuyen_du_lieu] 🔄 [17/21] Đang tính toán chu kỳ cho Đài: Vĩnh Long...
+[15/06/2026 06:44:24] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Vĩnh Long: 300/1015 kỳ (29.6%)
+[15/06/2026 06:44:25] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Vĩnh Long: 600/1015 kỳ (59.1%)
+[15/06/2026 06:44:26] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Vĩnh Long: 900/1015 kỳ (88.7%)
+[15/06/2026 06:44:28] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98500 dòng của đài Vĩnh Long xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:28] [PYTHON - chuyen_du_lieu] 🔄 [18/21] Đang tính toán chu kỳ cho Đài: Vũng Tàu...
+[15/06/2026 06:44:29] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Vũng Tàu: 300/1019 kỳ (29.4%)
+[15/06/2026 06:44:30] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Vũng Tàu: 600/1019 kỳ (58.9%)
+[15/06/2026 06:44:30] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Vũng Tàu: 900/1019 kỳ (88.3%)
+[15/06/2026 06:44:33] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Vũng Tàu xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:33] [PYTHON - chuyen_du_lieu] 🔄 [19/21] Đang tính toán chu kỳ cho Đài: Đà Lạt...
+[15/06/2026 06:44:34] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đà Lạt: 300/1019 kỳ (29.4%)
+[15/06/2026 06:44:34] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đà Lạt: 600/1019 kỳ (58.9%)
+[15/06/2026 06:44:35] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đà Lạt: 900/1019 kỳ (88.3%)
+[15/06/2026 06:44:37] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98900 dòng của đài Đà Lạt xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:37] [PYTHON - chuyen_du_lieu] 🔄 [20/21] Đang tính toán chu kỳ cho Đài: Đồng Nai...
+[15/06/2026 06:44:38] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đồng Nai: 300/1018 kỳ (29.5%)
+[15/06/2026 06:44:39] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đồng Nai: 600/1018 kỳ (58.9%)
+[15/06/2026 06:44:39] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đồng Nai: 900/1018 kỳ (88.4%)
+[15/06/2026 06:44:41] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98800 dòng của đài Đồng Nai xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:41] [PYTHON - chuyen_du_lieu] 🔄 [21/21] Đang tính toán chu kỳ cho Đài: Đồng Tháp...
+[15/06/2026 06:44:42] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đồng Tháp: 300/1018 kỳ (29.5%)
+[15/06/2026 06:44:43] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đồng Tháp: 600/1018 kỳ (58.9%)
+[15/06/2026 06:44:43] [PYTHON - chuyen_du_lieu]    ↳ Tiến độ đài Đồng Tháp: 900/1018 kỳ (88.4%)
+[15/06/2026 06:44:45] [PYTHON - chuyen_du_lieu] 💾 Đã xả 98800 dòng của đài Đồng Tháp xuống ổ cứng & giải phóng RAM.
+[15/06/2026 06:44:45] [PYTHON - chuyen_du_lieu] ✅ Hoàn thành xuất sắc! Toàn bộ 21 đài đã được trích xuất an toàn vào tệp: /opt/render/project/src/backend/data_training_ai.csv
+[13:44:46 15/6/2026] [NODE] 🛠️ Robot đang kích hoạt chạy tiến trình AI: [du_doan.py]...
+[15/06/2026 06:44:48] [PYTHON - du_doan] Bắt đầu chạy thuật toán dự đoán AI...
+[15/06/2026 06:44:57] [PYTHON - du_doan] 🔄 Đang quét đối chiếu và đồng bộ kết quả thực tế...
+[15/06/2026 06:44:57] [PYTHON - du_doan] 🎉 Hoàn tất cập nhật đối chiếu tại: /opt/render/project/src/backend/../frontend/js/history_predictions.json
+[13:44:59 15/6/2026] [NODE] 🛠️ Robot đang kích hoạt chạy tiến trình AI: [build_js_data.py]...
+[15/06/2026 06:45:01] [PYTHON - build_data] Bắt đầu đóng gói dữ liệu tĩnh JS...
+[15/06/2026 06:45:16] [PYTHON - build_data] 🎉 Đã tạo thành công file tĩnh đồ thị tại: /opt/render/project/src/backend/../frontend/js/dashboard_data.js
+[13:45:16 15/6/2026] [NODE] 🚀 [GITHUB] Đang chuẩn bị đồng bộ toàn bộ dữ liệu lên GitHub...
