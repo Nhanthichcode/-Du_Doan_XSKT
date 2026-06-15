@@ -255,9 +255,10 @@ cron.schedule('0 9 * * *', () => {
     runDailyMLOpsPipeline();
 }, { scheduled: true, timezone: "Asia/Ho_Chi_Minh" });
 
-app.get('/ping', apiLimiter, verifySecretKey, (req, res) => {
+app.get('/ping', apiLimiter, verifySecretKey, async (req, res) => {
     logAction(` NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
     res.json({ success: true, status: "Hệ thống xác thực thành công. Pipeline đang kiểm tra dữ liệu ngầm..." });
+    await initPythonEnvironment();
     runDailyMLOpsPipeline();
 });
 
