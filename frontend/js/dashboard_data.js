@@ -1,5 +1,5 @@
 const xoso_data = {
-  "build_time": "13/06/2026 12:23:54",
+  "build_time": "15/06/2026 04:31:22",
   "timeline_x": [
     "01/05/2006",
     "02/05/2006",
@@ -7129,7 +7129,9 @@ const xoso_data = {
     "10/06/2026",
     "11/06/2026",
     "12/06/2026",
-    "13/06/2026"
+    "13/06/2026",
+    "14/06/2026",
+    "15/06/2026"
   ],
   "lines_y": {
     "Cà Mau": [
@@ -14257,6 +14259,8 @@ const xoso_data = {
       null,
       null,
       75,
+      null,
+      null,
       null,
       null,
       null,
@@ -21392,7 +21396,9 @@ const xoso_data = {
       null,
       null,
       null,
-      74
+      74,
+      null,
+      null
     ],
     "Đồng Tháp": [
       23,
@@ -28519,6 +28525,8 @@ const xoso_data = {
       null,
       null,
       93,
+      null,
+      null,
       null,
       null,
       null,
@@ -35654,6 +35662,8 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
       null
     ],
     "Bến Tre": [
@@ -42782,6 +42792,8 @@ const xoso_data = {
       null,
       null,
       47,
+      null,
+      null,
       null,
       null,
       null,
@@ -49916,6 +49928,8 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
       null
     ],
     "Cần Thơ": [
@@ -57045,6 +57059,8 @@ const xoso_data = {
       null,
       null,
       63,
+      null,
+      null,
       null,
       null,
       null
@@ -64178,6 +64194,8 @@ const xoso_data = {
       54,
       null,
       null,
+      null,
+      null,
       null
     ],
     "Đồng Nai": [
@@ -71307,6 +71325,8 @@ const xoso_data = {
       null,
       null,
       33,
+      null,
+      null,
       null,
       null,
       null
@@ -78440,6 +78460,8 @@ const xoso_data = {
       null,
       27,
       null,
+      null,
+      null,
       null
     ],
     "An Giang": [
@@ -85570,6 +85592,8 @@ const xoso_data = {
       null,
       null,
       43,
+      null,
+      null,
       null,
       null
     ],
@@ -92702,6 +92726,8 @@ const xoso_data = {
       null,
       88,
       null,
+      null,
+      null,
       null
     ],
     "Bình Dương": [
@@ -99833,6 +99859,8 @@ const xoso_data = {
       null,
       null,
       83,
+      null,
+      null,
       null
     ],
     "Trà Vinh": [
@@ -106964,6 +106992,8 @@ const xoso_data = {
       null,
       null,
       46,
+      null,
+      null,
       null
     ],
     "Vĩnh Long": [
@@ -114095,6 +114125,8 @@ const xoso_data = {
       null,
       null,
       90,
+      null,
+      null,
       null
     ],
     "Long An": [
@@ -121226,7 +121258,9 @@ const xoso_data = {
       null,
       null,
       null,
-      31
+      31,
+      null,
+      null
     ],
     "Bình Phước": [
       null,
@@ -128357,7 +128391,9 @@ const xoso_data = {
       null,
       null,
       null,
-      72
+      72,
+      null,
+      null
     ],
     "Hậu Giang": [
       null,
@@ -135488,7 +135524,9 @@ const xoso_data = {
       null,
       null,
       null,
-      93
+      93,
+      null,
+      null
     ],
     "Đà Lạt": [
       null,
@@ -142619,7 +142657,9 @@ const xoso_data = {
       null,
       null,
       null,
-      null
+      null,
+      72,
+      72
     ],
     "Tiền Giang": [
       null,
@@ -149750,7 +149790,9 @@ const xoso_data = {
       null,
       null,
       null,
-      null
+      null,
+      62,
+      62
     ],
     "Kiên Giang": [
       null,
@@ -156881,24 +156923,83 @@ const xoso_data = {
       null,
       null,
       null,
-      null
+      null,
+      23,
+      23
     ]
   },
   "top_3_today": [
     {
-      "dai": "Long An",
+      "dai": "Đà Lạt",
       "predictions": [
         {
-          "so": "74",
-          "xac_suat": 55.04
+          "so": "11",
+          "xac_suat": 59.76
         },
         {
-          "so": "87",
-          "xac_suat": 54.78
+          "so": "82",
+          "xac_suat": 56.29
         },
+        {
+          "so": "36",
+          "xac_suat": 56.13
+        }
+      ],
+      "actual_g8": "72",
+      "is_hit": false
+    },
+    {
+      "dai": "Tiền Giang",
+      "predictions": [
+        {
+          "so": "35",
+          "xac_suat": 56.14
+        },
+        {
+          "so": "40",
+          "xac_suat": 56.13
+        },
+        {
+          "so": "72",
+          "xac_suat": 54.33
+        }
+      ],
+      "actual_g8": "62",
+      "is_hit": false
+    },
+    {
+      "dai": "Kiên Giang",
+      "predictions": [
         {
           "so": "77",
-          "xac_suat": 54.76
+          "xac_suat": 55.7
+        },
+        {
+          "so": "34",
+          "xac_suat": 55.29
+        },
+        {
+          "so": "74",
+          "xac_suat": 54.95
+        }
+      ],
+      "actual_g8": "23",
+      "is_hit": false
+    },
+    {
+      "dai": "Đồng Tháp",
+      "predictions": [
+        {
+          "so": "94",
+          "xac_suat": 56.19
+        },
+        {
+          "so": "54",
+          "xac_suat": 55.88
+        },
+        {
+          "so": "47",
+          "xac_suat": 55.37
         }
       ]
     },
@@ -156906,53 +157007,86 @@ const xoso_data = {
       "dai": "Hồ Chí Minh",
       "predictions": [
         {
-          "so": "14",
-          "xac_suat": 54.84
+          "so": "95",
+          "xac_suat": 60.25
         },
         {
-          "so": "91",
-          "xac_suat": 54.65
+          "so": "65",
+          "xac_suat": 58.09
         },
         {
-          "so": "52",
-          "xac_suat": 54.56
+          "so": "85",
+          "xac_suat": 57.84
         }
       ]
     },
     {
-      "dai": "Hậu Giang",
+      "dai": "Cà Mau",
       "predictions": [
         {
-          "so": "28",
-          "xac_suat": 54.9
+          "so": "34",
+          "xac_suat": 56.13
         },
         {
-          "so": "81",
-          "xac_suat": 54.88
+          "so": "99",
+          "xac_suat": 55.99
         },
         {
-          "so": "17",
+          "so": "35",
+          "xac_suat": 55.97
+        }
+      ]
+    },
+    {
+      "dai": "Vĩnh Long",
+      "predictions": [
+        {
+          "so": "25",
+          "xac_suat": 56.88
+        },
+        {
+          "so": "14",
+          "xac_suat": 55.88
+        },
+        {
+          "so": "95",
+          "xac_suat": 55.19
+        }
+      ]
+    },
+    {
+      "dai": "Trà Vinh",
+      "predictions": [
+        {
+          "so": "89",
+          "xac_suat": 57.01
+        },
+        {
+          "so": "72",
+          "xac_suat": 56.08
+        },
+        {
+          "so": "38",
+          "xac_suat": 55.79
+        }
+      ]
+    },
+    {
+      "dai": "Bình Dương",
+      "predictions": [
+        {
+          "so": "73",
+          "xac_suat": 58.04
+        },
+        {
+          "so": "63",
+          "xac_suat": 55.92
+        },
+        {
+          "so": "14",
           "xac_suat": 54.78
         }
       ]
-    },
-    {
-      "dai": "Bình Phước",
-      "predictions": [
-        {
-          "so": "15",
-          "xac_suat": 56.16
-        },
-        {
-          "so": "24",
-          "xac_suat": 55.13
-        },
-        {
-          "so": "50",
-          "xac_suat": 54.29
-        }
-      ]
     }
-  ],
-  "backtest_history": []
+  ]
 };
