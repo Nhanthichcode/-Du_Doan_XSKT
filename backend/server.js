@@ -218,16 +218,20 @@ const runDailyMLOpsPipeline = async () => {
     }
 };
 
-cron.schedule('0 9 * * *', () => {
-    logAction("⏰ [ĐỒNG HỒ NỘI BỘ] Điểm mốc 9h00 sáng, kích hoạt chuỗi tự động...");
-    runDailyMLOpsPipeline();
-}, { scheduled: true, timezone: "Asia/Ho_Chi_Minh" });
 
 app.get('/ping', apiLimiter, verifySecretKey, async (req, res) => {
-    logAction(` NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
-    res.json({ success: true, status: "Hệ thống xác thực thành công. Pipeline đang kiểm tra dữ liệu ngầm..." });
-    await initPythonEnvironment();
-    runDailyMLOpsPipeline();
+    logAction(`🔔 NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
+    res.json({ success: true, status: "Pipeline đang kiểm tra dữ liệu ngầm..." });
+    
+    // Tách luồng xử lý nặng ra sau khi phản hồi Express để không làm treo đứng request
+    process.nextTick(async () => {
+        try {
+            await initPythonEnvironment();
+            await runDailyMLOpsPipeline();
+        } catch (e) {
+            logAction(`❌ Lỗi luồng ping ngầm: ${e.message}`);
+        }
+    });
 });
 
 const logLimiter = rateLimit({
