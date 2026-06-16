@@ -2,7 +2,8 @@ name: Watchdog - Danh thuc Render moi ngay
 
 on:
   schedule:
-    - cron: '0 10 * * *'
+    # 10:30 UTC tương đương 17:30 Giờ Việt Nam
+    - cron: '30 10 * * *'
   workflow_dispatch:
 
 jobs:
@@ -10,9 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Gui tin hieu Ping toi Render
+      - name: Kich hoat va giu thuc Render
         env:
           MLOPS_KEY: ${{ secrets.MLOPS_SECRET_KEY }}
         run: |
+          echo "Bắt đầu kích hoạt tiến trình MLOps lúc 17h30..."
           curl -X GET "https://du-doan-xskt.onrender.com/ping" \
           -H "X-Secret-Key: $MLOPS_KEY"
+          
+          echo -e "\n\nBắt đầu chu trình giữ thức máy chủ trong 60 phút..."
+          
+          # Vòng lặp 30 lần, mỗi lần nghỉ 120 giây (2 phút)
+          for i in {1..20}; do
+            sleep 120
+            echo "Ping giữ thức lần thứ $i..."
+            # Dùng -s -o /dev/null -w "%{http_code}" để in ra Status Code thay vì in toàn bộ JSON dài dòng
+            curl -s -o /dev/null -w "Trạng thái phản hồi: %{http_code}\n" -X GET "https://du-doan-xskt.onrender.com/ping" -H "X-Secret-Key: $MLOPS_KEY"
+          done
+          
+          echo "Hoàn thành phiên làm việc."
