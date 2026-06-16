@@ -18,6 +18,54 @@
     <style>
         #main-app-wrapper { display: block !important; }
         .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* --- UI/UX Bộ lọc kiểu E-commerce bổ sung --- */
+        .ecommerce-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .w-100 { width: 100%; }
+        .ml-auto { margin-left: auto; }
+        .flex-2 { flex: 2; min-width: 100px; }
+
+        .ecommerce-filters select {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            outline: none;
+            flex: 1;
+            min-width: 70px;
+            cursor: pointer;
+            transition: border 0.3s;
+        }
+        .ecommerce-filters select:hover { border-color: var(--primary); }
+
+        /* --- Tối ưu Nút biểu đồ --- */
+        .btn-nav.btn-lg {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            background-color: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-nav.btn-lg:active {
+            background-color: var(--primary);
+            color: #fff;
+            transform: scale(0.95);
+        }
+        .chart-nav-controls { padding: 10px; gap: 10px; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -53,6 +101,22 @@
                         <h3 class="section-title text-danger">
                             <span>Đối Chiếu Kỳ Trước</span>
                         </h3>
+                        <div class="ecommerce-filters">
+                            <select id="filter-bt-dai"><option value="all">Tất cả đài</option></select>
+                            <select id="filter-bt-month">
+                                <option value="all">Tháng</option>
+                                <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option><option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option><option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option><option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+                            </select>
+                            <select id="filter-bt-year">
+                                <option value="all">Năm</option>
+                                <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option>
+                            </select>
+                            <select id="filter-bt-status">
+                                <option value="all">Trạng thái</option>
+                                <option value="win">Đúng (Trúng)</option>
+                                <option value="loss">Sai (Trượt)</option>
+                            </select>
+                        </div>
                         <div id="backtest-list" class="sidebar-list">
                             <div class="chart-tip">Đang nạp đối chiếu...</div>
                         </div>
@@ -63,19 +127,28 @@
             <main class="app-main">
                 
                 <div class="chart-box">
-                    <div class="chart-header">
+                    <div class="chart-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
                         <h3 class="chart-title">Xu Hướng Giải 8 (00-99 Cố Định)</h3>
-                        <div class="toolbar-panel">
-                            <div class="filter-bar">
+                        <div class="toolbar-panel w-100">
+                            <div class="ecommerce-filters w-100">
                                 <select id="cbo-timeframe">
-                                    <option value="recent" selected>30 Kỳ Gần Nhất</option>
-                                    <option value="2years">2 Năm Gần Nhất</option>
-                                    <option value="all">Toàn Bộ Lịch Sử</option>
+                                    <option value="recent" selected>30 Kỳ</option>
+                                    <option value="2years">2 Năm</option>
+                                    <option value="all">Toàn Bộ</option>
                                 </select>
-                            </div>
-                            <div class="action-buttons">
-                                <button id="btn-select-all" class="btn">Bật Hết</button>
-                                <button id="btn-deselect-all" class="btn">Tắt Hết</button>
+                                <select id="filter-chart-dai"><option value="all">Tất cả đài</option></select>
+                                <select id="filter-chart-month">
+                                    <option value="all">Tháng</option>
+                                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                </select>
+                                <select id="filter-chart-year">
+                                    <option value="all">Năm</option>
+                                    <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option>
+                                </select>
+                                <div class="action-buttons ml-auto">
+                                    <button id="btn-select-all" class="btn">Bật Hết</button>
+                                    <button id="btn-deselect-all" class="btn">Tắt Hết</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -86,13 +159,13 @@
 
                     <div class="chart-nav-controls">
                         <div class="nav-group">
-                            <button id="btn-zoom-in" class="btn-nav">+</button>
-                            <button id="btn-zoom-out" class="btn-nav">-</button>
-                            <button id="btn-zoom-reset" class="btn-nav" style="width: auto; padding: 0 0.5rem; font-size: 0.75rem;">Mặc Định</button>
+                            <button id="btn-zoom-in" class="btn-nav btn-lg" title="Phóng to">➕ Zoom</button>
+                            <button id="btn-zoom-out" class="btn-nav btn-lg" title="Thu nhỏ">➖ Zoom</button>
+                            <button id="btn-zoom-reset" class="btn-nav btn-lg">🔄 Reset</button>
                         </div>
                         <div class="nav-group">
-                            <button id="btn-pan-left" class="btn-nav">◀</button>
-                            <button id="btn-pan-right" class="btn-nav">▶</button>
+                            <button id="btn-pan-left" class="btn-nav btn-lg">◀ Trái</button>
+                            <button id="btn-pan-right" class="btn-nav btn-lg">Phải ▶</button>
                         </div>
                     </div>
                 </div>
@@ -102,13 +175,16 @@
                         <h3 class="chart-title">Danh Sách Tra Cứu</h3>
                     </div>
                     <div class="table-controls">
-                        <div class="table-search-panel">
-                            <input type="text" id="table-search-input" class="input-search" placeholder="Tìm đài, con số...">
-                            <select id="table-filter-year" class="input-search" style="max-width: 120px;">
-                                <option value="all">Tất Cả</option>
-                                <option value="2026">2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
+                        <div class="table-search-panel ecommerce-filters w-100">
+                            <input type="text" id="table-search-input" class="input-search flex-2" placeholder="Tìm số...">
+                            <select id="filter-tbl-dai" class="input-search"><option value="all">Tất cả đài</option></select>
+                            <select id="filter-tbl-month" class="input-search">
+                                <option value="all">Tháng</option>
+                                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                            </select>
+                            <select id="filter-tbl-year" class="input-search">
+                                <option value="all">Năm</option>
+                                <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option>
                             </select>
                         </div>
                     </div>
