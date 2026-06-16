@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
-    <!-- Ép tải lại CSS mới nhất chống cache -->
     <link class="css-st" rel="stylesheet" href="css/style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -36,7 +35,13 @@
         
         <header class="app-header">
             <div class="header-left">
-                <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Bảng thông tin">Menu</button>
+                <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Bảng thông tin">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 <h1 class="app-title">Hệ Thống Phân Tích & Dự Đoán AI XSMN</h1>
             </div>
             <div class="app-meta">
@@ -47,30 +52,30 @@
             </div>
         </header>
 
-        <div id="app-container" class="app-layout">
+        <div class="app-container">
             
             <aside class="app-sidebar">
-                
-                <div class="section-box">
-                    <h3 class="section-title text-success">
-                        <span>Số Vàng Tiếp Theo</span>
-                        <span id="lbl-pred-date" style="font-size: 0.75rem; color: var(--text-muted)">Đang tải...</span>
-                    </h3>
-                    <div id="prediction-list" class="sidebar-list">
-                        <div class="chart-tip">Đang đồng bộ dữ liệu dự đoán từ máy chủ...</div>
+                <div class="sidebar-content">
+                    <div class="section-box">
+                        <h3 class="section-title text-success">
+                            <span>Số Vàng Tiếp Theo</span>
+                            <span id="lbl-pred-date" style="font-size: 0.75rem; color: var(--text-muted)">Đang tải...</span>
+                        </h3>
+                        <div id="prediction-list" class="sidebar-list">
+                            <div class="chart-tip">Đang đồng bộ dữ liệu dự đoán từ máy chủ...</div>
+                        </div>
+                    </div>
+
+                    <div class="section-box">
+                        <h3 class="section-title text-danger">
+                            <span>Đối Chiếu Kỳ Trước</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted)">Kết quả gần nhất</span>
+                        </h3>
+                        <div id="backtest-list" class="sidebar-list">
+                            <div class="chart-tip">Đang nạp dữ liệu đối chiếu...</div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="section-box">
-                    <h3 class="section-title text-danger">
-                        <span>Đối Chiếu Kỳ Trước</span>
-                        <span style="font-size: 0.75rem; color: var(--text-muted)">Kết quả gần nhất</span>
-                    </h3>
-                    <div id="backtest-list" class="sidebar-list">
-                        <div class="chart-tip">Đang nạp dữ liệu đối chiếu...</div>
-                    </div>
-                </div>
-
             </aside>
 
             <main class="app-main">
@@ -119,7 +124,7 @@
                     </div>
 
                     <div class="chart-tip">
-                        Trục Y luôn được giữ Cố Định từ 00 đến 99 để phản ánh chính xác biên độ. Bạn có thể kéo qua/lại hoặc cuộn chuột để di chuyển dòng thời gian.
+                        
                     </div>
                     
                     <div class="chart-container">
@@ -196,7 +201,6 @@
         </div>
     </div>
 
-    <!-- SỬ DỤNG ?v= thời gian để ép GitHub Pages luôn nạp code JS mới nhất -->
     <script src="js/dashboard_data.js"></script>
     <script src="js/app.js"></script>
 </body>
