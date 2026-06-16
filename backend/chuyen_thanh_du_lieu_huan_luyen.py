@@ -2,7 +2,7 @@ import pandas as pd
 import re
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # 1. ĐỊNH NGHĨA ĐƯỜNG DẪN TUYỆT ĐỐI CHUẨN
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -12,7 +12,8 @@ OUTPUT_FILE = os.path.join(BASE_DIR, 'data_training_ai.csv')
 
 # 2. HÀM GHI LOG ĐỒNG BỘ VÀO SYSTEM_LOG.TXT
 def log_action(message):
-    timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });'
+    # ĐÃ SỬA: Chuyển cú pháp JavaScript thành cú pháp Python GMT+7 chuẩn xác
+    timestamp = (datetime.utcnow() + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S')
     log_entry = f"[{timestamp}] [PYTHON - chuyen_du_lieu] {message}\n"
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
