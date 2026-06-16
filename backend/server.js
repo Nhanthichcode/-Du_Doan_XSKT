@@ -57,7 +57,7 @@ const apiLimiter = rateLimit({
 
 const apiLogsLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: 10, 
+    max: 50, 
     statusCode: 429,
     message: {
         success: false,
@@ -219,17 +219,32 @@ const runDailyMLOpsPipeline = async () => {
 };
 
 
+let isPipelineRunning = false;
+
+// 3. Sửa lại API /ping
 app.get('/ping', apiLimiter, verifySecretKey, async (req, res) => {
-    logAction(`🔔 NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
-    res.json({ success: true, status: "Pipeline đang kiểm tra dữ liệu ngầm..." });
     
-    // Tách luồng xử lý nặng ra sau khi phản hồi Express để không làm treo đứng request
+    // Nếu tiến trình đang chạy rồi, chỉ trả lời để giữ Server thức, KHÔNG chạy lại luồng Python
+    if (isPipelineRunning) {
+        logAction(`💧 [KEEP-AWAKE] Nhận ping giữ thức. Tiến trình vẫn đang chạy ngầm...`);
+        return res.json({ success: true, status: "Server đang thức. Pipeline hiện đang chạy rồi..." });
+    }
+
+    // Nếu chưa chạy thì bắt đầu chạy
+    logAction(`🔔 NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
+    res.json({ success: true, status: "Pipeline bắt đầu kiểm tra dữ liệu ngầm..." });
+    
+    isPipelineRunning = true; // Khóa cờ lại
+
+    // Tách luồng xử lý nặng ra sau
     process.nextTick(async () => {
         try {
             await initPythonEnvironment();
             await runDailyMLOpsPipeline();
         } catch (e) {
             logAction(`❌ Lỗi luồng ping ngầm: ${e.message}`);
+        } finally {
+            isPipelineRunning = false; // Mở khóa cờ lại dù thành công hay lỗi
         }
     });
 });
