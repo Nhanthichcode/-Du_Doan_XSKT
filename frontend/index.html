@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI XSMN - Hệ Thống Giám Sát Xu Hướng MLOps</title>
+    <title>AI XSMN - Hệ Thống Giám SATA Xu Hướng MLOps</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,16 +16,47 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
     <style>
-        /* Đảm bảo giao diện hiển thị ngay lập tức, không bị ẩn */
-        #main-app-wrapper { 
-            display: block !important; 
-        }
+        #main-app-wrapper { display: block !important; }
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
-        /* Tối ưu hóa vùng hiển thị bảng dữ liệu trên thiết bị di động */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        /* Hiệu ứng hộp kính đếm ngược MLOps mới thay thế cho Terminal */
+        .mlops-countdown-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .mlops-countdown-card::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .countdown-info { display: flex; flex-direction: column; gap: 0.35rem; }
+        .countdown-title { font-size: 0.95rem; font-weight: 700; color: var(--text-main); letter-spacing: 0.02em; }
+        .countdown-desc { font-size: 0.78rem; color: var(--text-muted); }
+        .countdown-timer-group { display: flex; gap: 0.5rem; align-items: center; }
+        .timer-block {
+            background: rgba(3, 7, 18, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            min-width: 65px;
+            text-align: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .timer-num { font-family: 'Fira Code', monospace; font-size: 1.4rem; font-weight: 700; color: #38bdf8; text-shadow: 0 0 10px rgba(56,189,248,0.4); }
+        .timer-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; font-weight: 500; }
+        .timer-separator { font-family: 'Fira Code', monospace; font-size: 1.4rem; font-weight: 700; color: var(--border-color); animation: flash 1s infinite; }
+        @keyframes flash { 50% { opacity: 0.3; } }
+        @media (max-width: 640px) {
+            .mlops-countdown-card { flex-direction: column; text-align: center; align-items: center; }
         }
     </style>
 </head>
@@ -35,13 +66,7 @@
         
         <header class="app-header">
             <div class="header-left">
-                <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Bảng thông tin">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
+                <button id="btn-toggle-sidebar" class="toggle-sidebar-btn" title="Đóng/Mở Thanh Bên">Menu</button>
                 <h1 class="app-title">Hệ Thống Phân Tích & Dự Đoán AI XSMN</h1>
             </div>
             <div class="app-meta">
@@ -52,28 +77,26 @@
             </div>
         </header>
 
-        <div class="app-container">
+        <div id="app-container" class="app-layout">
             
             <aside class="app-sidebar">
-                <div class="sidebar-content">
-                    <div class="section-box">
-                        <h3 class="section-title text-success">
-                            <span>Số Vàng Tiếp Theo</span>
-                            <span id="lbl-pred-date" style="font-size: 0.75rem; color: var(--text-muted)">Đang tải...</span>
-                        </h3>
-                        <div id="prediction-list" class="sidebar-list">
-                            <div class="chart-tip">Đang đồng bộ dữ liệu dự đoán từ máy chủ...</div>
-                        </div>
+                <div class="section-box">
+                    <h3 class="section-title text-success">
+                        <span>Số Vàng Tiếp Theo</span>
+                        <span id="lbl-pred-date" style="font-size: 0.75rem; color: var(--text-muted)">Đang tải...</span>
+                    </h3>
+                    <div id="prediction-list" class="sidebar-list">
+                        <div class="chart-tip">Đang đồng bộ dữ liệu dự đoán từ máy chủ...</div>
                     </div>
+                </div>
 
-                    <div class="section-box">
-                        <h3 class="section-title text-danger">
-                            <span>Đối Chiếu Kỳ Trước</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted)">Kết quả gần nhất</span>
-                        </h3>
-                        <div id="backtest-list" class="sidebar-list">
-                            <div class="chart-tip">Đang nạp dữ liệu đối chiếu...</div>
-                        </div>
+                <div class="section-box">
+                    <h3 class="section-title text-danger">
+                        <span>Đối Chiếu Kỳ Trước</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted)">Kết quả gần nhất</span>
+                    </h3>
+                    <div id="backtest-list" class="sidebar-list">
+                        <div class="chart-tip">Đang nạp dữ liệu đối chiếu...</div>
                     </div>
                 </div>
             </aside>
@@ -83,7 +106,6 @@
                 <div class="chart-box">
                     <div class="chart-header">
                         <h3 class="chart-title">Biểu Đồ Xu Hướng Giải 8 XSMN (Y: 00-99 Cố Định)</h3>
-                        
                         <div class="toolbar-panel">
                             <div class="filter-bar">
                                 <label for="cbo-timeframe">Thời gian:</label>
@@ -96,26 +118,8 @@
                                     <option value="2025">Năm 2025</option>
                                     <option value="2024">Năm 2024</option>
                                     <option value="2023">Năm 2023</option>
-                                    <option value="2022">Năm 2022</option>
-                                    <option value="2021">Năm 2021</option>
-                                    <option value="2020">Năm 2020</option>
-                                    <option value="2019">Năm 2019</option>
-                                    <option value="2018">Năm 2018</option>
-                                    <option value="2017">Năm 2017</option>
-                                    <option value="2016">Năm 2016</option>
-                                    <option value="2015">Năm 2015</option>
-                                    <option value="2014">Năm 2014</option>
-                                    <option value="2013">Năm 2013</option>
-                                    <option value="2012">Năm 2012</option>
-                                    <option value="2011">Năm 2011</option>
-                                    <option value="2010">Năm 2010</option>
-                                    <option value="2009">Năm 2009</option>
-                                    <option value="2008">Năm 2008</option>
-                                    <option value="2007">Năm 2007</option>
-                                    <option value="2006">Năm 2006</option>
                                 </select>
                             </div>
-
                             <div class="action-buttons">
                                 <button id="btn-select-all" class="btn btn-secondary">Chọn Tất Cả</button>
                                 <button id="btn-deselect-all" class="btn btn-danger-outline">Bỏ Chọn Tất Cả</button>
@@ -124,7 +128,7 @@
                     </div>
 
                     <div class="chart-tip">
-                        
+                        Trục Y luôn được giữ Cố Định từ 00 đến 99 để phản ánh chính xác biên độ. Bạn có thể kéo qua/lại hoặc cuộn chuột để di chuyển dòng thời gian.
                     </div>
                     
                     <div class="chart-container">
@@ -138,7 +142,6 @@
                             <button id="btn-zoom-out" class="btn-nav" title="Thu nhỏ">-</button>
                             <button id="btn-zoom-reset" class="btn-nav" style="width: auto; padding: 0 0.5rem; font-size: 0.75rem;">Mặc Định</button>
                         </div>
-
                         <div class="nav-group">
                             <span class="nav-label">Di chuyển Trục X:</span>
                             <button id="btn-pan-left" class="btn-nav" title="Kéo qua trái">◀</button>
@@ -147,11 +150,33 @@
                     </div>
                 </div>
 
+                <div class="mlops-countdown-card">
+                    <div class="countdown-info">
+                        <span class="countdown-title">⚡ CHU KỲ PIPELINE MLOPS KẾ TIẾP</span>
+                        <span class="countdown-desc">Hệ thống AI sẽ tự động kích hoạt thu thập, tối ưu trọng số Random Forest vào lúc 23:40 đêm.</span>
+                    </div>
+                    <div class="countdown-timer-group">
+                        <div class="timer-block">
+                            <div id="timer-hours" class="timer-num">00</div>
+                            <div class="timer-label">Giờ</div>
+                        </div>
+                        <div class="timer-separator">:</div>
+                        <div class="timer-block">
+                            <div id="timer-mins" class="timer-num">00</div>
+                            <div class="timer-label">Phút</div>
+                        </div>
+                        <div class="timer-separator">:</div>
+                        <div class="timer-block">
+                            <div id="timer-secs" class="timer-num">00</div>
+                            <div class="timer-label">Giây</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="history-list-box">
                     <div class="chart-header">
                         <h3 class="chart-title">Tra Cứu Danh Sách Toàn Bộ Dữ Liệu</h3>
                     </div>
-
                     <div class="table-controls">
                         <div class="table-search-panel">
                             <input type="text" id="table-search-input" class="input-search" placeholder="Tìm đài hoặc số (VD: Tiền Giang, 81)...">
@@ -161,16 +186,9 @@
                                 <option value="2025">Năm 2025</option>
                                 <option value="2024">Năm 2024</option>
                                 <option value="2023">Năm 2023</option>
-                                <option value="2022">Năm 2022</option>
-                                <option value="2021">Năm 2021</option>
-                                <option value="2020">Năm 2020</option>
-                                <option value="2015">Năm 2015</option>
-                                <option value="2010">Năm 2010</option>
-                                <option value="2006">Năm 2006</option>
                             </select>
                         </div>
                     </div>
-
                     <div class="table-container">
                         <table class="datatable">
                             <thead>
@@ -187,7 +205,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="table-pagination-panel">
                         <span id="table-entries-info">Đang tải...</span>
                         <div style="display: flex; gap: 0.5rem;">
