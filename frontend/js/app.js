@@ -38,7 +38,6 @@ function initPermanentDashboard() {
     allHistoricalRecords.sort((a, b) => b.date - a.date);
     filteredTableData = [...allHistoricalRecords];
 
-    // GỌT SẠCH: Gọi file tĩnh trơn không nhãn thời gian ngẫu nhiên gây cache lỗi
     fetch('js/history_predictions.json')
         .then(response => response.json())
         .then(historyJson => {
@@ -96,7 +95,7 @@ function initPermanentDashboard() {
                                     ${isWin ? `<div class="match-celebration-banner">🎯 TRÚNG GIẢI 8 [${actualG8Str}]</div>` : ''}
                                     <div class="history-meta"><span>${pred.dai}</span><span>${date}</span></div>
                                     <div class="history-data"><span class="history-dai-name">Kết quả về:</span><span class="history-result">${actualG8Str}</span></div>
-                               </div>
+                                </div>
                             `;
                         }
                     });
@@ -104,7 +103,7 @@ function initPermanentDashboard() {
             });
             if (backtestDiv) backtestDiv.innerHTML = backtestHtml || `<div class="chart-tip">Đang đồng bộ...</div>`;
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Lỗi nạp dữ liệu Số Vàng:", err));
 
     renderAdvanceChart('recent', data);
     renderHistoricalTable();
@@ -163,7 +162,6 @@ function renderAdvanceChart(filterType, data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // KHÓA HOÀN TOÀN HOVER RIÊNG LẺ: Giữ nguyên trạng thái nhấp nháy phát sáng nhẹ nhàng của CSS
             hover: { mode: null }, 
             plugins: {
                 legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } },
@@ -209,6 +207,62 @@ function renderHistoricalTable() {
     document.getElementById("btn-table-prev").disabled = tableCurrentPage === 1;
     document.getElementById("btn-table-next").disabled = endIndex >= filteredTableData.length;
 }
+
+const btnTablePrev = document.getElementById("btn-table-prev");
+const btnTableNext = document.getElementById("btn-table-next");
+if (btnTablePrev && btnTableNext) {
+    btnTablePrev.addEventListener("click", () => {
+        if (tableCurrentPage > 1) { tableCurrentPage--; renderHistoricalTable(); }
+    });
+    btnTableNext.addEventListener("click", () => {
+        const maxPage = Math.ceil(filteredTableData.length / tablePageSize);
+        if (tableCurrentPage < maxPage) { tableCurrentPage++; renderHistoricalTable(); }
+    });
+}
+
+const cboTimeframe = document.getElementById("cbo-timeframe");
+if (cboTimeframe) {
+    cboTimeframe.addEventListener("change", (e) => {
+        if (xoso_data) renderAdvanceChart(e.target.value, xoso_data);
+    });
+}
+
+const btnSelectAll = document.getElementById("btn-select-all");
+const btnDeselectAll = document.getElementById("btn-deselect-all");
+if (btnSelectAll && btnDeselectAll) {
+    btnSelectAll.addEventListener("click", () => {
+        if (!historyChart) return;
+        historyChart.data.datasets.forEach((_, i) => historyChart.setDatasetVisibility(i, true));
+        historyChart.update();
+    });
+    btnDeselectAll.addEventListener("click", () => {
+        if (!historyChart) return;
+        historyChart.data.datasets.forEach((_, i) => historyChart.setDatasetVisibility(i, false));
+        historyChart.update();
+    });
+}
+
+document.getElementById("btn-zoom-in").addEventListener("click", () => { if (historyChart) historyChart.zoom(1.2); });
+document.getElementById("btn-zoom-out").addEventListener("click", () => { if (historyChart) historyChart.zoom(0.8); });
+document.getElementById("btn-zoom-reset").addEventListener("click", () => { if (historyChart) historyChart.resetZoom(); });
+document.getElementById("btn-pan-left").addEventListener("click", () => {
+    if (historyChart) {
+        const xAxis = historyChart.scales.x;
+        const diff = (xAxis.max - xAxis.min) * 0.2;
+        xAxis.options.min = xAxis.min - diff;
+        xAxis.options.max = xAxis.max - diff;
+        historyChart.update();
+    }
+});
+document.getElementById("btn-pan-right").addEventListener("click", () => {
+    if (historyChart) {
+        const xAxis = historyChart.scales.x;
+        const diff = (xAxis.max - xAxis.min) * 0.2;
+        xAxis.options.min = xAxis.min + diff;
+        xAxis.options.max = xAxis.max + diff;
+        historyChart.update();
+    }
+});
 
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 if (btnToggleSidebar) {
