@@ -138,6 +138,7 @@ function initPermanentDashboard() {
 
     renderAdvanceChart('recent', data);
     renderHistoricalTable();
+    initMLOpsCountdown(); // Kích hoạt bộ đếm thời gian thực
 
     const searchInput = document.getElementById("table-search-input");
     const filterYearSelect = document.getElementById("table-filter-year");
@@ -181,7 +182,7 @@ function initPermanentDashboard() {
             historyChart.data.datasets.forEach((dataset, index) => {
                 historyChart.setDatasetVisibility(index, false); 
             });
-            historyChart.update('none'); 
+            historyChart.update(); // Chuyển động mượt mà khi ẩn
         });
     }
 
@@ -192,7 +193,7 @@ function initPermanentDashboard() {
             historyChart.data.datasets.forEach((dataset, index) => {
                 historyChart.setDatasetVisibility(index, true); 
             });
-            historyChart.update('none'); 
+            historyChart.update(); // Chuyển động mượt mà khi hiện
         });
     }
 
@@ -276,12 +277,16 @@ function renderAdvanceChart(filterType, data) {
             label: channelName,
             data: slicedPoints,
             borderColor: paletteColors[colorIdx % paletteColors.length],
-            backgroundColor: paletteColors[colorIdx % paletteColors.length] + '20',
+            backgroundColor: paletteColors[colorIdx % paletteColors.length] + '10',
             borderWidth: 2.5,
-            pointRadius: filterType === 'recent' ? 5 : 1,
-            tension: 0.15,
+            pointRadius: filterType === 'recent' ? 4 : 0.5,
+            tension: 0.2, // Đường uốn mượt mà hơn
             spanGaps: true,
-            hidden: colorIdx >= 4 
+            hidden: colorIdx >= 3,
+            // Cấu hình hiệu ứng Động Phát Sáng (Hover Glow Effect) chuẩn chỉnh
+            hoverBorderWidth: 5,
+            hoverBorderColor: '#ffffff',
+            pointHoverRadius: 7
         });
         colorIdx++;
     }
@@ -297,14 +302,41 @@ function renderAdvanceChart(filterType, data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            // FIXED ANIMATION: Kích hoạt hiệu ứng tịnh tiến và biến đổi động mượt mà
+            animations: {
+                y: { duration: 400, easing: 'easeInOutCubic' },
+                x: { duration: 400, easing: 'easeInOutCubic' }
+            },
+            // Kích hoạt tương tác bám dính theo trục X để làm nổi bật đường Line hover
+            interaction: { mode: 'index', intersect: false },
+            onHover: (event, chartElements) => {
+                if (!historyChart) return;
+                if (chartElements.length > 0) {
+                    const activeDatasetIdx = chartElements[0].datasetIndex;
+                    historyChart.data.datasets.forEach((dataset, idx) => {
+                        if (idx === activeDatasetIdx) {
+                            dataset.borderWidth = 4.5;
+                        } else {
+                            dataset.borderColor = paletteColors[idx % paletteColors.length] + '35'; // Làm mờ các đường còn lại
+                            dataset.borderWidth = 1.5;
+                        }
+                    });
+                } else {
+                    // Trả lại trạng thái mặc định khi đưa chuột ra ngoài
+                    historyChart.data.datasets.forEach((dataset, idx) => {
+                        dataset.borderColor = paletteColors[idx % paletteColors.length];
+                        dataset.borderWidth = 2.5;
+                    });
+                }
+                historyChart.update('none'); // Cập nhật trạng thái đè ngay lập tức không trễ
+            },
             scales: {
                 x: { 
                     grid: { color: '#1e293b' },
                     ticks: { color: '#94a3b8', maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }
                 },
                 y: { 
-                    min: 0, 
-                    max: 99, 
+                    min: 0, max: 99, 
                     grid: { color: '#1e293b' },
                     ticks: { color: '#94a3b8', stepSize: 10, callback: v => String(v).padStart(2, '0') } 
                 }
@@ -316,61 +348,11 @@ function renderAdvanceChart(filterType, data) {
                 },
                 zoom: {
                     pan: { enabled: true, mode: 'x', threshold: 10 },
-                    zoom: {
-                        wheel: { enabled: true, speed: 0.08 },
-                        pinch: { enabled: true },
-                        mode: 'x',
-                    },
-                    limits: {
-                        y: { min: 0, max: 99, minRange: 99, maxRange: 99 }
-                    }
+                    zoom: { wheel: { enabled: true, speed: 0.08 }, pinch: { enabled: true }, mode: 'x' },
+                    limits: { y: { min: 0, max: 99, minRange: 99, maxRange: 99 } }
                 }
             }
-        },
-        plugins: [{
-            id: 'inlineZoomLabels',
-            afterDatasetsDraw(chart) {
-                try {
-                    const { ctx, scales: { x } } = chart;
-                    const totalPoints = currentTimelineX.length;
-                    const visiblePoints = x.max - x.min;
-                    
-                    const zoomRatio = (totalPoints - visiblePoints) / totalPoints;
-
-                    if (zoomRatio >= 0.10) { 
-                        ctx.save();
-                        ctx.font = 'bold 11px Inter, sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-
-                        chart.data.datasets.forEach((dataset, dIdx) => {
-                            if (chart.isDatasetVisible(dIdx)) {
-                                const meta = chart.getDatasetMeta(dIdx);
-                                meta.data.forEach((element, pIdx) => {
-                                    if (pIdx >= x.min && pIdx <= x.max) {
-                                        const value = dataset.data[pIdx];
-                                        if (value !== null && value !== undefined) {
-                                            ctx.fillStyle = '#ffffff';
-                                            ctx.beginPath();
-                                            ctx.arc(element.x, element.y, 9, 0, 2 * Math.PI);
-                                            ctx.fill();
-
-                                            ctx.strokeStyle = dataset.borderColor;
-                                            ctx.lineWidth = 1;
-                                            ctx.stroke();
-                                            
-                                            ctx.fillStyle = dataset.borderColor;
-                                            ctx.fillText(String(value).padStart(2, '0'), element.x, element.y);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        ctx.restore();
-                    }
-                } catch (err) {}
-            }
-        }]
+        }
     });
 }
 
@@ -391,7 +373,6 @@ function renderHistoricalTable() {
 
     pageData.forEach(item => {
         const tr = document.createElement("tr");
-        
         const numericVal = parseInt(item.g8);
         const chanLeStr = numericVal % 2 === 0 ? "Chẵn" : "Lẻ";
         const dauStr = Math.floor(numericVal / 10);
@@ -415,22 +396,47 @@ function renderHistoricalTable() {
     document.getElementById("btn-table-next").disabled = endIndex >= filteredTableData.length;
 }
 
-// [FIXED]: Sửa lỗi đóng băng nút Menu Sidebar
+// Hàm tính toán đếm ngược múi giờ Việt Nam sang 23h40 hàng ngày
+function initMLOpsCountdown() {
+    const updateTimer = () => {
+        const now = new Date();
+        // Chuyển đổi thời gian hiện tại sang múi giờ Asia/Ho_Chi_Minh
+        const vnTimeStr = now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
+        const vnNow = new Date(vnTimeStr);
+        
+        const target = new Date(vnTimeStr);
+        target.setHours(23, 40, 0, 0); // Đặt mốc đích 23:40 tối nay
+        
+        // Nếu đã quá 23h40 thì đích đến sẽ cuộn sang ngày tiếp theo
+        if (vnNow >= target) {
+            target.setDate(target.getDate() + 1);
+        }
+        
+        const diffMs = target - vnNow;
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
+        
+        document.getElementById('timer-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('timer-mins').textContent = String(mins).padStart(2, '0');
+        document.getElementById('timer-secs').textContent = String(secs).padStart(2, '0');
+    };
+    setInterval(updateTimer, 1000);
+    updateTimer();
+}
+
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 if (btnToggleSidebar) {
     btnToggleSidebar.addEventListener('click', () => {
-        const sidebar = document.querySelector('.app-sidebar');
-        if (!sidebar) return;
+        const container = document.getElementById('app-container');
+        if (!container) return;
         
         document.body.classList.add('sidebar-toggling');
-        sidebar.classList.toggle('collapsed');
-        sidebar.classList.toggle('active'); 
+        container.classList.toggle('sidebar-collapsed');
         
         setTimeout(() => {
             if (historyChart) {
-                try {
-                    historyChart.resize();
-                } catch (e) {}
+                try { historyChart.resize(); } catch (e) {}
             }
             document.body.classList.remove('sidebar-toggling');
         }, 320);
@@ -438,9 +444,5 @@ if (btnToggleSidebar) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    try {
-        initPermanentDashboard();
-    } catch (err) {
-        console.warn("Lỗi khởi chạy môi trường: ", err);
-    }
+    try { initPermanentDashboard(); } catch (err) { console.warn(err); }
 });
