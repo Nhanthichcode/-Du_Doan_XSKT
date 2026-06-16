@@ -13,7 +13,7 @@ MODEL_OUTPUT = os.path.join(BASE_DIR, 'model_xsmn_predict.pkl')
 
 # 2. HÀM GHI LOG ĐỒNG BỘ VÀO SYSTEM_LOG.TXT
 def log_action(message):
-    timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });'
+    timestamp = (datetime.utcnow() + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S')
     log_entry = f"[{timestamp}] [PYTHON - master_ai] {message}\n"
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
