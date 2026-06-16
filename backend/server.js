@@ -309,14 +309,5 @@ app.get('/logs', logLimiter, (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-    try {
-        logAction("[AUTO-START] Hệ thống bắt đầu nạp cấu hình chạy thử nghiệm tự động...");
-        await initPythonEnvironment();
-        
-        logAction("[AUTO-START] Kích hoạt chuỗi quy trình chính (Pipeline Check)...");
-        // Khi server vừa build xong, tự khởi chạy luôn pipeline kiểm tra xem có dữ liệu mới không
-        runDailyMLOpsPipeline();
-    } catch (startErr) {
-        logAction(`[AUTO-START] Lỗi khởi động: ${startErr.message}`);
-    }
+    
 });
