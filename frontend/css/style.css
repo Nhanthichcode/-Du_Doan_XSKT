@@ -123,6 +123,60 @@ canvas#historyLineChart {
 .datatable th, .datatable td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-color); }
 .datatable th { background-color: #090d16; color: var(--text-muted); }
 
+/* --- UI/UX Bộ lọc kiểu E-commerce --- */
+.ecommerce-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.w-100 { width: 100%; }
+.ml-auto { margin-left: auto; }
+.flex-2 { flex: 2; min-width: 100px; }
+
+.ecommerce-filters select {
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    outline: none;
+    flex: 1;
+    min-width: 70px;
+    cursor: pointer;
+    transition: border 0.3s;
+}
+.ecommerce-filters select:hover {
+    border-color: var(--primary);
+}
+
+/* --- Tối ưu Nút biểu đồ (Dễ bấm trên mobile) --- */
+.btn-nav.btn-lg {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: rgba(59, 130, 246, 0.15); /* Nền xanh dương nhạt */
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-nav.btn-lg:active {
+    background-color: var(--primary);
+    color: #fff;
+    transform: scale(0.95); /* Hiệu ứng nhấn */
+}
+.chart-nav-controls {
+    padding: 10px;
+    gap: 10px;
+    flex-wrap: wrap; /* Tránh tràn nút trên mobile */
+}
+
 /* ĐÁP ỨNG DI ĐỘNG CHUẨN IPHONE 11 */
 @media (max-width: 1024px) {
     .app-layout { grid-template-columns: 1fr; }
