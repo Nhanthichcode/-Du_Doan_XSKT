@@ -155,7 +155,8 @@ const autoPushToGitHub = () => {
         if (!token || !user || !repo) return resolve("Bỏ qua Git Push");
         const configCmd = `git config --global user.email "bot-mlops@render.com" && git config --global user.name "MLOps Robot"`;
         const repoUrl = `https://${token}@github.com/${user}/${repo}.git`;
-        const filesToAdd = `../frontend/js/dashboard_data.js ../frontend/js/history_predictions.json xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl system_log.txt`;
+        //const filesToAdd = `../frontend/js/dashboard_data.js ../frontend/js/history_predictions.json xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl system_log.txt`;
+        const filesToAdd = `../frontend/js/dashboard_data.js ../frontend/js/history_predictions.json xsmn_tong_hop_20_nam.csv system_log.txt`;
         const pushCmd = `rm -f .git/index.lock && git add ${filesToAdd} --ignore-errors && git commit -m "Robot: Cập nhật dữ liệu MLOps - $(date '+%Y-%m-%d %H:%M:%S')" && git pull ${repoUrl} main --rebase --autostash && git push ${repoUrl} HEAD:main`;
         exec(`${configCmd} && ${pushCmd}`, (error, stdout) => {
             if (error) { logAction(`❌ Lỗi tự động push GitHub: ${error}`); return reject(error); }
@@ -202,7 +203,7 @@ const runDailyMLOpsPipeline = async () => {
         // NẾU CÓ DỮ LIỆU MỚI -> KÍCH HOẠT TOÀN BỘ LUỒNG TÍNH TOÁN
         logAction("🔥 Phát hiện dữ liệu mới! Kích hoạt toàn bộ luồng xử lý AI & Đóng gói...");
         await runPythonScript('chuyen_thanh_du_lieu_huan_luyen.py');
-        await runPythonScript('master_ai.py');        
+        //await runPythonScript('master_ai.py');        
         await runPythonScript('du_doan.py'); 
         await runPythonScript('build_js_data.py');
         
