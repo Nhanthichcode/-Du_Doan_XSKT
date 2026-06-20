@@ -1,5 +1,5 @@
 const xoso_data = {
-  "build_time": "19/06/2026 12:58:42",
+  "build_time": "20/06/2026 14:49:44",
   "timeline_x": [
     "01/05/2006",
     "02/05/2006",
@@ -7134,7 +7134,8 @@ const xoso_data = {
     "15/06/2026",
     "16/06/2026",
     "17/06/2026",
-    "18/06/2026"
+    "18/06/2026",
+    "19/06/2026"
   ],
   "lines_y": {
     "Cà Mau": [
@@ -14269,6 +14270,7 @@ const xoso_data = {
       null,
       null,
       47,
+      null,
       null,
       null,
       null
@@ -21407,6 +21409,7 @@ const xoso_data = {
       34,
       null,
       null,
+      null,
       null
     ],
     "Đồng Tháp": [
@@ -28541,6 +28544,7 @@ const xoso_data = {
       null,
       null,
       98,
+      null,
       null,
       null,
       null
@@ -35679,6 +35683,7 @@ const xoso_data = {
       null,
       50,
       null,
+      null,
       null
     ],
     "Bến Tre": [
@@ -42814,6 +42819,7 @@ const xoso_data = {
       null,
       null,
       83,
+      null,
       null,
       null
     ],
@@ -49951,6 +49957,7 @@ const xoso_data = {
       null,
       19,
       null,
+      null,
       null
     ],
     "Cần Thơ": [
@@ -57087,6 +57094,7 @@ const xoso_data = {
       null,
       null,
       60,
+      null,
       null
     ],
     "Sóc Trăng": [
@@ -64223,6 +64231,7 @@ const xoso_data = {
       null,
       null,
       33,
+      null,
       null
     ],
     "Đồng Nai": [
@@ -71359,6 +71368,7 @@ const xoso_data = {
       null,
       null,
       24,
+      null,
       null
     ],
     "Tây Ninh": [
@@ -78495,7 +78505,8 @@ const xoso_data = {
       null,
       null,
       null,
-      37
+      37,
+      null
     ],
     "An Giang": [
       null,
@@ -85631,7 +85642,8 @@ const xoso_data = {
       null,
       null,
       null,
-      77
+      77,
+      null
     ],
     "Bình Thuận": [
       null,
@@ -92767,7 +92779,8 @@ const xoso_data = {
       null,
       null,
       null,
-      98
+      98,
+      null
     ],
     "Bình Dương": [
       null,
@@ -99903,7 +99916,8 @@ const xoso_data = {
       null,
       null,
       null,
-      null
+      null,
+      62
     ],
     "Trà Vinh": [
       null,
@@ -107039,7 +107053,8 @@ const xoso_data = {
       null,
       null,
       null,
-      null
+      null,
+      81
     ],
     "Vĩnh Long": [
       null,
@@ -114175,7 +114190,8 @@ const xoso_data = {
       null,
       null,
       null,
-      null
+      null,
+      46
     ],
     "Long An": [
       null,
@@ -121307,6 +121323,7 @@ const xoso_data = {
       null,
       null,
       31,
+      null,
       null,
       null,
       null,
@@ -128447,6 +128464,7 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
       null
     ],
     "Hậu Giang": [
@@ -135579,6 +135597,7 @@ const xoso_data = {
       null,
       null,
       93,
+      null,
       null,
       null,
       null,
@@ -142719,6 +142738,7 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
       null
     ],
     "Tiền Giang": [
@@ -149855,6 +149875,7 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
       null
     ],
     "Kiên Giang": [
@@ -156988,6 +157009,7 @@ const xoso_data = {
       null,
       null,
       23,
+      null,
       null,
       null,
       null,

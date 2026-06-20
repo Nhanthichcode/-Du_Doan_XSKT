@@ -74,7 +74,9 @@
           "so": "96",
           "xac_suat": 54.81
         }
-      ]
+      ],
+      "actual_g8": "62",
+      "is_hit": false
     },
     {
       "dai": "Trà Vinh",
@@ -91,7 +93,9 @@
           "so": "34",
           "xac_suat": 55.46
         }
-      ]
+      ],
+      "actual_g8": "81",
+      "is_hit": false
     },
     {
       "dai": "Vĩnh Long",
@@ -107,6 +111,78 @@
         {
           "so": "21",
           "xac_suat": 54.36
+        }
+      ],
+      "actual_g8": "46",
+      "is_hit": false
+    }
+  ],
+  "20/06/2026": [
+    {
+      "dai": "Bình Phước",
+      "predictions": [
+        {
+          "so": "15",
+          "xac_suat": 56.61
+        },
+        {
+          "so": "45",
+          "xac_suat": 54.61
+        },
+        {
+          "so": "14",
+          "xac_suat": 54.28
+        }
+      ]
+    },
+    {
+      "dai": "Hậu Giang",
+      "predictions": [
+        {
+          "so": "16",
+          "xac_suat": 55.54
+        },
+        {
+          "so": "81",
+          "xac_suat": 54.86
+        },
+        {
+          "so": "44",
+          "xac_suat": 54.8
+        }
+      ]
+    },
+    {
+      "dai": "Hồ Chí Minh",
+      "predictions": [
+        {
+          "so": "77",
+          "xac_suat": 56.43
+        },
+        {
+          "so": "97",
+          "xac_suat": 55.14
+        },
+        {
+          "so": "52",
+          "xac_suat": 54.27
+        }
+      ]
+    },
+    {
+      "dai": "Long An",
+      "predictions": [
+        {
+          "so": "99",
+          "xac_suat": 57.86
+        },
+        {
+          "so": "87",
+          "xac_suat": 55.29
+        },
+        {
+          "so": "77",
+          "xac_suat": 55.03
         }
       ]
     }
