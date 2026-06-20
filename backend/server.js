@@ -1,5 +1,7 @@
 const express = require('express');
 const { spawn, exec } = require('child_process');
+const nodemailer = require('nodemailer');
+const cron = require('node-cron');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit'); 
 require('dotenv').config();
