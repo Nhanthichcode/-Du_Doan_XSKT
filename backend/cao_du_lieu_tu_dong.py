@@ -35,12 +35,12 @@ def crawl_missing_data():
             END_DATE = vn_now.date() - timedelta(days=1)
             print(f"⏳ Hệ thống chạy trước 23h40. Chiến lược: Chỉ quét dải dữ liệu đến hết ngày hôm qua ({END_DATE.strftime('%d/%m/%Y')}) để tránh lặp ngày.")
 
-        START_DATE_10_DAYS = END_DATE - timedelta(days=10)
+        START_DATE_30_DAYS = END_DATE - timedelta(days=30)
         print(f"📅 Khung ngày kiểm tra vá hổng dữ liệu: Từ {START_DATE_10_DAYS.strftime('%d/%m/%Y')} đến {END_DATE.strftime('%d/%m/%Y')}")
 
         # --- 3. PHÂN TÍCH DỮ LIỆU CŨ TRONG KHO CSV ---
         print("🔍 Đang phân tích dữ liệu cũ...")
-        expected_dates = set(START_DATE_10_DAYS + timedelta(days=x) for x in range((END_DATE - START_DATE_10_DAYS).days + 1))
+        expected_dates = set(START_DATE_30_DAYS + timedelta(days=x) for x in range((END_DATE - START_DATE_10_DAYS).days + 1))
         existing_dates = set()
 
         if os.path.exists(FILE_TONG_HOP) and os.path.getsize(FILE_TONG_HOP) > 0:
@@ -55,7 +55,7 @@ def crawl_missing_data():
             print(json.dumps({
                 "success": True, 
                 "has_new_data": False, 
-                "message": f"Dữ liệu trong dải ngày yêu cầu (đến {END_DATE.strftime('%d/%m/%Y')}) đã đầy đủ. Không cần bổ sung."
+                "message": f"Dữ liệu trong 30 ngày trước ngày ( {END_DATE.strftime('%d/%m/%Y')}) đã đầy đủ. Không cần bổ sung."
             }))
             return
 
