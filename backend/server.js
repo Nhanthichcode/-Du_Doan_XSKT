@@ -155,7 +155,7 @@ const selfHealingGitRecovery = () => {
 
 const runDailyMLOpsPipeline = async () => {
     const startTime = Date.now();
-    pipelineStatus = 'running';
+    //pipelineStatus = 'running';
     
     logAction("\n======================================================================");
     logAction("[INFO] [WORKFLOW] KICH HOAT CHUOI QUY TRINH MLOPS TU DONG");
@@ -210,18 +210,23 @@ const runDailyMLOpsPipeline = async () => {
 };
 
 app.get('/ping', apiLimiter, verifySecretKey, async (req, res) => {
+    // 1. Nếu đã hoàn thành xong chu trình -> Chặn tuyệt đối
     if (pipelineStatus === 'success_done') {
-        logAction("[WARN] [PING] BLOCKED: Nhan tin hieu ping. He thong ngay hom nay da hoan thanh chu trinh tron tru. Tu choi kich hoat lai luong Python.");
+        logAction("[WARN] [PING] BLOCKED: Nhan tin hieu ping. He thong ngay hom nay da hoan thanh chu trinh tron tru.");
         return res.json({ success: true, status: "Chu trinh hom nay da hoan thanh hoan hao. Khong can chay lai." });
     }
 
+    // 2. CHẶN NGAY TẠI ĐÂY: Nếu đang chạy HOẶC đang nạp môi trường PIP -> Chặn không cho tạo luồng thứ 2
     if (pipelineStatus === 'running') {
-        logAction("[INFO] [PING] KEEP-AWAKE: Nhan ping giu thuc. Tien trinh van dang chay ngam...");
-        return res.json({ success: true, status: "Server dang thuc. Pipeline hien dang xu ly tinh toan roi..." });
+        logAction("[INFO] [PING] KEEP-AWAKE: Nhan ping giu thuc. Tien trinh hoac moi truong dang duoc xu ly ngam...");
+        return res.json({ success: true, status: "Server dang thuc. Pipeline hien dang xu ly roi..." });
     }
 
     logAction("[INFO] [PING] Nhan lenh kich hoat tu Watchdog an toan.");
     res.json({ success: true, status: "Pipeline bat dau kiem tra du lieu ngam..." });
+    
+    // KHÓA CỜ NGAY LẬP TỨC để chặn đứng các lệnh ping tiếp theo trong lúc nạp PIP
+    pipelineStatus = 'running'; 
     
     process.nextTick(async () => {
         try {
@@ -229,7 +234,7 @@ app.get('/ping', apiLimiter, verifySecretKey, async (req, res) => {
             await runDailyMLOpsPipeline();
         } catch (e) {
             logAction(`[ERROR] [PING] Loi luong ping ngam: ${e.message}`);
-            pipelineStatus = 'idle';
+            pipelineStatus = 'idle'; // Chỉ nhả cờ về idle khi có lỗi thật sự
         }
     });
 });
