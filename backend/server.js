@@ -305,14 +305,4 @@ app.get('/logs', logLimiter, (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-    try {
-        logAction("[INFO] [AUTO-START] He thong bat dau nap cau hinh chay thu nghiem tu dong...");
-        await initPythonEnvironment();
-        
-        logAction("[INFO] [AUTO-START] Kich hoat chuoi quy trinh chinh (Pipeline Check)...");
-        runDailyMLOpsPipeline();
-    } catch (startErr) {
-        logAction(`[FATAL] [AUTO-START] Loi khoi dong: ${startErr.message}`);
-        pipelineStatus = 'idle';
-    }
 });
