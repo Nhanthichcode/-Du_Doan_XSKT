@@ -1,7 +1,5 @@
 const express = require('express');
 const { spawn, exec } = require('child_process');
-const nodemailer = require('nodemailer');
-const cron = require('node-cron');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit'); 
 require('dotenv').config();
@@ -19,10 +17,11 @@ const path = require('path');
 const logPath = path.join(__dirname, 'system_log.txt');
 const MAX_LOG_SIZE_MB = 2; 
 
+// CHUẨN HÓA HÀM GHI LOG VỚI NHÃN LEVEL RÕ RÀNG
 const logAction = (message) => {
     try {
         const timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-        const logEntry = `[${timestamp}] [NODE] ${message}\n`;
+        const logEntry = `[${timestamp}] ${message}\n`;
         
         if (fs.existsSync(logPath)) {
             const stats = fs.statSync(logPath);
@@ -32,14 +31,14 @@ const logAction = (message) => {
                 const data = fs.readFileSync(logPath, 'utf8');
                 const lines = data.split('\n');
                 const trimmedData = lines.slice(-500).join('\n');
-                fs.writeFileSync(logPath, "[HỆ THỐNG] Đã tự động dọn dẹp cắt tỉa log cũ để bảo vệ tài nguyên...\n" + trimmedData, 'utf8');
+                fs.writeFileSync(logPath, "[WARN] [SYSTEM] Da tu dong don dep cat tia log cu de bao ve tai nguyen...\n" + trimmedData, 'utf8');
             }
         }
         
         fs.appendFileSync(logPath, logEntry, 'utf8');
         console.log(logEntry.trim());
     } catch (err) {
-        console.error("❌ Không thể ghi vào file log:", err);
+        console.error("[ERROR] [SYSTEM] Khong the ghi vao file log:", err);
     }
 };
 
@@ -49,29 +48,20 @@ const apiLimiter = rateLimit({
     statusCode: 429,
     message: {
         success: false,
-        error: "Bạn đã gửi quá nhiều yêu cầu lên hệ thống. Vui lòng thử lại sau 15 phút."
+        error: "Ban da gui qua nhieu yeu cau len he thong. Vui long thu lai sau 15 phut."
     },
     standardHeaders: true, 
     legacyHeaders: false, 
 });
 
-const apiLogsLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: 50, 
-    statusCode: 429,
-    message: {
-        success: false,
-        error: "Bạn đã gửi quá nhiều yêu cầu lên hệ thống. Vui lòng thử lại sau 15 phút."
-    },
-    standardHeaders: true, 
-    legacyHeaders: false, 
-});
+// Quản lý trạng thái vòng đời chu trình: 'idle', 'running', 'success_done'
+let pipelineStatus = 'idle';
 
 app.get('/', (req, res) => {
-    logAction("⚠️ Phát hiện một truy cập trái phép cố tình vào gốc định tuyến / của Render.");
+    logAction("[WARN] [SECURITY] Phat hien mot truy cap trai phep co tinh vao goc dinh tuyen / cua Render.");
     return res.status(403).json({
         success: false,
-        error: "Access Denied: Máy chủ này chỉ phục vụ các tác vụ API MLOps nội bộ."
+        error: "Access Denied: May chu nay chi phuc vu cac tac vu API MLOps noi bo."
     });
 });
 
@@ -80,181 +70,184 @@ app.get('/api/system-log', (req, res) => {
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         return res.sendFile(logPath);
     }
-    res.status(404).send("Chưa có dữ liệu nhật ký hệ thống.");
+    res.status(404).send("Chua co du lieu nhat ky he thong.");
 });
 
 app.use('/api/', apiLimiter);
 
 const verifySecretKey = (req, res, next) => {
-
-    const secretKey =
-        req.headers['x-secret-key'] ||
-        req.query.secret;
-
-    const systemSecret =
-        process.env.MLOPS_SECRET_KEY?.trim();
+    const secretKey = req.headers['x-secret-key'] || req.query.secret;
+    const systemSecret = process.env.MLOPS_SECRET_KEY?.trim();
 
     if (!systemSecret) {
-
-        logAction(
-            "⚠️ MLOPS_SECRET_KEY chưa được cấu hình"
-        );
-
-        return res.status(500).json({
-            success: false,
-            error: "Server chưa cấu hình secret"
-        });
+        logAction("[ERROR] [SECURITY] MLOPS_SECRET_KEY chua duoc cau hinh");
+        return res.status(500).json({ success: false, error: "Server chua cau hinh secret" });
     }
 
     if (!secretKey || secretKey !== systemSecret) {
-
-        logAction(
-            `⚠️ Truy cập trái phép từ IP ${req.ip}`
-        );
-
-        return res.status(403).json({
-            success: false,
-            error: "Sai mã bảo mật"
-        });
+        logAction(`[WARN] [SECURITY] Truy cap trai phep tu IP ${req.ip}`);
+        return res.status(403).json({ success: false, error: "Sai ma bao mat" });
     }
-
     next();
 };
 
 const initPythonEnvironment = () => {
     return new Promise((resolve) => {
-        logAction("🛠️ [MÔI TRƯỜNG] Đang kiểm tra và đồng bộ nhanh các thư viện AI qua PIP...");
+        logAction("[INFO] [ENVIRONMENT] Dang kiem tra va dong bo nhanh cac thu vien AI qua PIP...");
         const checkEnvCmd = `python3 -m pip install -q --no-cache-dir --prefer-binary -r requirements.txt --break-system-packages > /dev/null 2>&1`;
         exec(checkEnvCmd, (error) => {
-            if (error) logAction(`⚠️ Cảnh báo môi trường: ${error.message}`);
-            else logAction("✅ [MÔI TRƯỜNG] Các thư viện Python đã được nạp sẵn sàng vào hệ thống!");
+            if (error) logAction(`[WARN] [ENVIRONMENT] Canh bao moi truong: ${error.message}`);
+            else logAction("[SUCCESS] [ENVIRONMENT] Cac thu vien Python da duoc nap san sang vao he thong!");
             resolve();
         });
     });
 };
 
-// Hàm chạy script Python chuẩn hóa sử dụng python3
 const runPythonScript = (scriptName, args = []) => {
     return new Promise((resolve, reject) => {
-        logAction(`🛠️ Robot đang kích hoạt chạy tiến trình AI: [${scriptName}]...`);
+        logAction(`[INFO] [PROCESS] Robot dang kich hoat chay tien trinh AI: [${scriptName}]...`);
         const pythonProcess = spawn('python3', [scriptName, ...args]);
         let output = ''; let error = '';
         pythonProcess.stdout.on('data', (data) => { output += data.toString(); });
         pythonProcess.stderr.on('data', (data) => { error += data.toString(); });
         pythonProcess.on('close', (code) => {
             if (code === 0) { resolve(output.trim()); } 
-            else { logAction(`❌ [THẤT BẠI] ${scriptName}: ${error}`); reject(error); }
+            else { logAction(`[ERROR] [PROCESS] ${scriptName} that bai: ${error}`); reject(error); }
         });
     });
 };
 
 const autoPushToGitHub = () => {
     return new Promise((resolve, reject) => {
-        logAction(`🚀 [GITHUB] Đang chuẩn bị đồng bộ toàn bộ dữ liệu lên GitHub...`);
+        logAction("[INFO] [GITHUB] Dang chuan bi dong bo toan bo du lieu len GitHub...");
         const token = process.env.GITHUB_TOKEN; const user = process.env.GITHUB_USER; const repo = process.env.GITHUB_REPO;
-        if (!token || !user || !repo) return resolve("Bỏ qua Git Push");
+        if (!token || !user || !repo) return resolve("Bo qua Git Push");
         const configCmd = `git config --global user.email "bot-mlops@render.com" && git config --global user.name "MLOps Robot"`;
         const repoUrl = `https://${token}@github.com/${user}/${repo}.git`;
-        //const filesToAdd = `../frontend/js/dashboard_data.js ../frontend/js/history_predictions.json xsmn_tong_hop_20_nam.csv model_xsmn_predict.pkl system_log.txt`;
         const filesToAdd = `../frontend/js/dashboard_data.js ../frontend/js/history_predictions.json xsmn_tong_hop_20_nam.csv system_log.txt`;
-        const pushCmd = `rm -f .git/index.lock && git add ${filesToAdd} --ignore-errors && git commit -m "Robot: Cập nhật dữ liệu MLOps - $(date '+%Y-%m-%d %H:%M:%S')" && git pull ${repoUrl} main --rebase --autostash && git push ${repoUrl} HEAD:main`;
+        const pushCmd = `rm -f .git/index.lock && git add ${filesToAdd} --ignore-errors && git commit -m "Robot: Cap nhat du lieu MLOps - $(date '+%Y-%m-%d %H:%M:%S')" && git pull ${repoUrl} main --rebase --autostash && git push ${repoUrl} HEAD:main`;
         exec(`${configCmd} && ${pushCmd}`, (error, stdout) => {
-            if (error) { logAction(`❌ Lỗi tự động push GitHub: ${error}`); return reject(error); }
-            logAction(`✅ [GITHUB] Đã đẩy thành công toàn bộ dữ liệu mới lên GitHub!`);
+            if (error) { logAction(`[ERROR] [GITHUB] Loi tu dong push GitHub: ${error}`); return reject(error); }
+            logAction("[SUCCESS] [GITHUB] Da day thanh cong toan bo du lieu moi len GitHub!");
             resolve(stdout);
         });
     });
 };
 
-// ===================================================================
-// CHUẨN HÓA TOÀN BỘ WORKFLOW: CHỈ TÍNH TOÁN TIẾP NẾU CÓ CẬP NHẬT MỚI
-// ===================================================================
+const selfHealingGitRecovery = () => {
+    return new Promise((resolve) => {
+        logAction("[INFO] [RECOVERY] Phat hien loi logic. Tien hanh don dep cache va keo du lieu moi nhat...");
+        const token = process.env.GITHUB_TOKEN; const user = process.env.GITHUB_USER; const repo = process.env.GITHUB_REPO;
+        if (!token || !user || !repo) return resolve();
+        
+        const repoUrl = `https://${token}@github.com/${user}/${repo}.git`;
+        const recoveryCmd = `rm -f .git/index.lock && git reset --hard HEAD && git clean -fd && git pull ${repoUrl} main`;
+        
+        exec(recoveryCmd, (error, stdout) => {
+            if (error) logAction(`[ERROR] [RECOVERY] Loi tu dong khoi phuc du lieu tu Git: ${error.message}`);
+            else logAction("[SUCCESS] [RECOVERY] Da dong bo trang thanh cong tai lieu sach tu GitHub Pages!");
+            resolve();
+        });
+    });
+};
+
 const runDailyMLOpsPipeline = async () => {
     const startTime = Date.now();
+    pipelineStatus = 'running';
+    
     logAction("\n======================================================================");
-    logAction(`⚡ [START WORKFLOW] KÍCH HOẠT CHUỖI QUY TRÌNH MLOPS TỰ ĐỘNG`);
+    logAction("[INFO] [WORKFLOW] KICH HOAT CHUOI QUY TRINH MLOPS TU DONG");
     logAction("======================================================================");
     
     try {
-        // Bước 1: Chạy file cào dữ liệu và hứng kết quả text từ stdout
         const crawlResultRaw = await runPythonScript('cao_du_lieu_tu_dong.py');
         let hasNewData = false;
 
         try {
-            // Thử bóc tách chuỗi JSON trả về từ file Python
             const jsonMatch = crawlResultRaw.match(/\{.*\}/s);
             if (jsonMatch) {
                 const crawlJson = JSON.parse(jsonMatch[0]);
                 hasNewData = crawlJson.has_new_data === true;
-                logAction(`📊 Kết quả phân tích: ${crawlJson.message}`);
+                logAction(`[INFO] [ANALYSIS] Ket qua phan tich: ${crawlJson.message}`);
             }
         } catch (jsonErr) {
-            logAction("⚠️ Không thể phân tích JSON từ script cào, ép buộc kiểm tra thủ công.");
-            hasNewData = true; // Phòng hờ lỗi kết cấu log thì vẫn cho chạy tiếp
+            logAction("[WARN] [ANALYSIS] Khong the phan tich JSON tu script cao, ep buoc kiem tra thu cong.");
+            hasNewData = true; 
         }
 
-        // ĐIỀU KIỆN CHẶN THÔNG MINH
         if (!hasNewData) {
-            logAction("🛑 [HỦY CHU KỲ] Không phát hiện dòng dữ liệu mới trong file tổng hợp. Toàn bộ các bước huấn luyện AI phía sau được tạm dừng để bảo vệ tài nguyên.");
-            logAction(`🎉 Quy trình đóng lại an toàn sau ${Math.round((Date.now() - startTime) / 1000)} giây.\n`);
+            logAction("[WARN] [WORKFLOW] HUY CHU KY: Khong phat hien dong du lieu moi trong file tong hop. Toan bo cac buoc huan luyen AI phia sau duoc tam dung de bao ve tai nguyen.");
+            logAction(`[SUCCESS] [WORKFLOW] Quy trinh dong lai an toan sau ${Math.round((Date.now() - startTime) / 1000)} giay.\n`);
+            pipelineStatus = 'success_done'; 
             return;
         }
 
-        // NẾU CÓ DỮ LIỆU MỚI -> KÍCH HOẠT TOÀN BỘ LUỒNG TÍNH TOÁN
-        logAction("🔥 Phát hiện dữ liệu mới! Kích hoạt toàn bộ luồng xử lý AI & Đóng gói...");
+        logAction("[INFO] [WORKFLOW] Phat hien du lieu moi! Kich hoat toan bo luong xu ly AI & Dong goi...");
         await runPythonScript('chuyen_thanh_du_lieu_huan_luyen.py');
-        //await runPythonScript('master_ai.py');        
         await runPythonScript('du_doan.py'); 
         await runPythonScript('build_js_data.py');
         
         try { 
             await autoPushToGitHub(); 
         } catch (gitErr) { 
-            logAction("⚠️ Git push thất bại nhưng dữ liệu local đã được cập nhật."); 
+            logAction("[WARN] [GITHUB] Git push that bai nhung du lieu local da duoc cap nhat."); 
         }
         
-        logAction(`🎉 [HOÀN THÀNH XUẤT SẮC] Toàn bộ hệ thống AI đã được tái cấu trúc thành công trong ${Math.round((Date.now() - startTime) / 1000)} giây!\n`);
+        logAction(`[SUCCESS] [WORKFLOW] Toan bo he thong AI da duoc tai cau truc thanh cong trong ${Math.round((Date.now() - startTime) / 1000)} giay!\n`);
+        pipelineStatus = 'success_done'; 
     } catch (err) {
-        logAction(`💥 [SỰ CỐ NGHIÊM TRỌNG] Chuỗi quy trình tự động bị đứt gãy: ${err}\n`);
+        logAction(`[FATAL] [WORKFLOW] Chuoi quy trinh tu dong bi dut gay: ${err}\n`);
+        pipelineStatus = 'idle'; 
+        
+        await selfHealingGitRecovery();
+        process.nextTick(async () => {
+            logAction("[INFO] [RE-RUN] Kich hoat chay tai khoi dong lai Pipeline sau khoi phuc...");
+            await runDailyMLOpsPipeline();
+        });
     }
 };
 
-
-let isPipelineRunning = false;
-
-// 3. Sửa lại API /ping
 app.get('/ping', apiLimiter, verifySecretKey, async (req, res) => {
-    
-    // Nếu tiến trình đang chạy rồi, chỉ trả lời để giữ Server thức, KHÔNG chạy lại luồng Python
-    if (isPipelineRunning) {
-        logAction(`💧 [KEEP-AWAKE] Nhận ping giữ thức. Tiến trình vẫn đang chạy ngầm...`);
-        return res.json({ success: true, status: "Server đang thức. Pipeline hiện đang chạy rồi..." });
+    if (pipelineStatus === 'success_done') {
+        logAction("[WARN] [PING] BLOCKED: Nhan tin hieu ping. He thong ngay hom nay da hoan thanh chu trinh tron tru. Tu choi kich hoat lai luong Python.");
+        return res.json({ success: true, status: "Chu trinh hom nay da hoan thanh hoan hao. Khong can chay lai." });
     }
 
-    // Nếu chưa chạy thì bắt đầu chạy
-    logAction(`🔔 NHẬN LỆNH KÍCH HOẠT TỪ WATCHDOG AN TOÀN!`);
-    res.json({ success: true, status: "Pipeline bắt đầu kiểm tra dữ liệu ngầm..." });
-    
-    isPipelineRunning = true; // Khóa cờ lại
+    if (pipelineStatus === 'running') {
+        logAction("[INFO] [PING] KEEP-AWAKE: Nhan ping giu thuc. Tien trinh van dang chay ngam...");
+        return res.json({ success: true, status: "Server dang thuc. Pipeline hien dang xu ly tinh toan roi..." });
+    }
 
-    // Tách luồng xử lý nặng ra sau
+    logAction("[INFO] [PING] Nhan lenh kich hoat tu Watchdog an toan.");
+    res.json({ success: true, status: "Pipeline bat dau kiem tra du lieu ngam..." });
+    
     process.nextTick(async () => {
         try {
             await initPythonEnvironment();
             await runDailyMLOpsPipeline();
         } catch (e) {
-            logAction(`❌ Lỗi luồng ping ngầm: ${e.message}`);
-        } finally {
-            isPipelineRunning = false; // Mở khóa cờ lại dù thành công hay lỗi
+            logAction(`[ERROR] [PING] Loi luong ping ngam: ${e.message}`);
+            pipelineStatus = 'idle';
         }
     });
 });
 
+cron.schedule('40 23 * * *', () => {
+    pipelineStatus = 'idle';
+    logAction("[INFO] [CRON] Den moc 23h40 toi, kich hoat chuoi tu dong...");
+    runDailyMLOpsPipeline();
+}, { scheduled: true, timezone: "Asia/Ho_Chi_Minh" });
+
+cron.schedule('0 0 * * *', () => {
+    pipelineStatus = 'idle';
+    logAction("[INFO] [RESET] Da buoc sang ngay moi. Mo khoa co trang thai MLOps Pipeline.");
+}, { scheduled: true, timezone: "Asia/Ho_Chi_Minh" });
+
 const logLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // Khung thời gian: 1 phút
-    max: 45, // Tối đa 45 lần gọi/IP trong 1 phút (2 giây/lần = 30 lần, dư 15 lần để mở tab mới)
+    windowMs: 1 * 60 * 1000, 
+    max: 45, 
     statusCode: 429,
-    message: "Bạn đang tải lại nhật ký quá nhanh. Vui lòng đợi vài giây.",
+    message: "Ban dang tai lai nhat ky qua nhanh. Vui long doi vai giay.",
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -266,14 +259,14 @@ app.get('/logs', logLimiter, (req, res) => {
             res.setHeader('Content-Type', 'text/plain; charset=utf-8'); 
             return res.sendFile(logFilePath); 
         }
-        return res.status(404).send("Chưa có log.");
+        return res.status(404).send("Chua co log.");
     }
     res.send(`
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Hệ Thống Giám Sát Log MLOps</title>
+            <title>He Thong Giam Sat Log MLOps</title>
             <style>
                 body { background-color: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 20px; margin: 0; } 
                 h2 { margin-bottom: 10px; color: #569cd6; }
@@ -281,18 +274,18 @@ app.get('/logs', logLimiter, (req, res) => {
             </style>
         </head>
         <body>
-            <h2>Nhật Ký Hệ Thống MLOps Live</h2>
-            <pre id="log-content">Đang nạp nhật ký hành động...</pre>
+            <h2>Nhat Ky He Thong MLOps Live</h2>
+            <pre id="log-content">Dang nap nhat ky hanh dong...</pre>
             <script>
                 async function fetchNewLogs() {
                     try {
                         const r = await fetch('/logs?raw=true');
                         if (r.ok) { 
                             const t = await r.text(); 
-                            const b = document.getElementById('log-content');                             
-                            if (b.innerText !== t.trim()) {                                
-                                const isAtBottom = (b.scrollHeight - b.scrollTop - b.clientHeight) < 50;                                
-                                b.innerText = t.trim();                                                                 
+                            const b = document.getElementById('log-content');                                             
+                            if (b.innerText !== t.trim()) {                                                 
+                                const isAtBottom = (b.scrollHeight - b.scrollTop - b.clientHeight) < 50;                                 
+                                b.innerText = t.trim();                                                                                 
                                 if (isAtBottom) {
                                     b.scrollTop = b.scrollHeight; 
                                 }
@@ -310,5 +303,14 @@ app.get('/logs', logLimiter, (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
-    
+    try {
+        logAction("[INFO] [AUTO-START] He thong bat dau nap cau hinh chay thu nghiem tu dong...");
+        await initPythonEnvironment();
+        
+        logAction("[INFO] [AUTO-START] Kich hoat chuoi quy trinh chinh (Pipeline Check)...");
+        runDailyMLOpsPipeline();
+    } catch (startErr) {
+        logAction(`[FATAL] [AUTO-START] Loi khoi dong: ${startErr.message}`);
+        pipelineStatus = 'idle';
+    }
 });
