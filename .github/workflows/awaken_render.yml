@@ -3,7 +3,7 @@ name: Watchdog - Danh thuc Render moi ngay
 on:
   schedule:
     # 10:30 UTC tương đương 17:30 Giờ Việt Nam
-    - cron: '30 10 * * *'
+    - cron: '12 16 * * *'
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
           echo -e "\n\nBắt đầu chu trình giữ thức máy chủ trong 60 phút..."
           
           # Vòng lặp 30 lần, mỗi lần nghỉ 120 giây (2 phút)
-          for i in {1..5}; do
+          for i in {1..10}; do
             sleep 120
             echo "Ping giữ thức lần thứ $i..."
             # Dùng -s -o /dev/null -w "%{http_code}" để in ra Status Code thay vì in toàn bộ JSON dài dòng
