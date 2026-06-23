@@ -133,7 +133,9 @@
           "so": "14",
           "xac_suat": 54.28
         }
-      ]
+      ],
+      "actual_g8": "60",
+      "is_hit": false
     },
     {
       "dai": "Hậu Giang",
@@ -150,7 +152,9 @@
           "so": "44",
           "xac_suat": 54.8
         }
-      ]
+      ],
+      "actual_g8": "26",
+      "is_hit": false
     },
     {
       "dai": "Hồ Chí Minh",
@@ -167,7 +171,9 @@
           "so": "52",
           "xac_suat": 54.27
         }
-      ]
+      ],
+      "actual_g8": "33",
+      "is_hit": false
     },
     {
       "dai": "Long An",
@@ -183,6 +189,61 @@
         {
           "so": "77",
           "xac_suat": 55.03
+        }
+      ],
+      "actual_g8": "73",
+      "is_hit": false
+    }
+  ],
+  "24/06/2026": [
+    {
+      "dai": "Cần Thơ",
+      "predictions": [
+        {
+          "so": "90",
+          "xac_suat": 55.17
+        },
+        {
+          "so": "21",
+          "xac_suat": 54.86
+        },
+        {
+          "so": "88",
+          "xac_suat": 54.45
+        }
+      ]
+    },
+    {
+      "dai": "Sóc Trăng",
+      "predictions": [
+        {
+          "so": "64",
+          "xac_suat": 55.84
+        },
+        {
+          "so": "90",
+          "xac_suat": 55.22
+        },
+        {
+          "so": "79",
+          "xac_suat": 54.86
+        }
+      ]
+    },
+    {
+      "dai": "Đồng Nai",
+      "predictions": [
+        {
+          "so": "99",
+          "xac_suat": 58.48
+        },
+        {
+          "so": "48",
+          "xac_suat": 54.21
+        },
+        {
+          "so": "82",
+          "xac_suat": 54.13
         }
       ]
     }

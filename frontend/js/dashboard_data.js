@@ -1,5 +1,5 @@
 const xoso_data = {
-  "build_time": "20/06/2026 16:24:00",
+  "build_time": "24/06/2026 01:13:09",
   "timeline_x": [
     "01/05/2006",
     "02/05/2006",
@@ -7135,7 +7135,11 @@ const xoso_data = {
     "16/06/2026",
     "17/06/2026",
     "18/06/2026",
-    "19/06/2026"
+    "19/06/2026",
+    "20/06/2026",
+    "21/06/2026",
+    "22/06/2026",
+    "23/06/2026"
   ],
   "lines_y": {
     "Cà Mau": [
@@ -14273,6 +14277,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      60,
       null
     ],
     "Hồ Chí Minh": [
@@ -21410,6 +21418,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      33,
+      null,
+      68,
       null
     ],
     "Đồng Tháp": [
@@ -28547,6 +28559,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      73,
       null
     ],
     "Bạc Liêu": [
@@ -35684,7 +35700,11 @@ const xoso_data = {
       50,
       null,
       null,
-      null
+      null,
+      null,
+      null,
+      null,
+      77
     ],
     "Bến Tre": [
       null,
@@ -42821,7 +42841,11 @@ const xoso_data = {
       83,
       null,
       null,
-      null
+      null,
+      null,
+      null,
+      null,
+      25
     ],
     "Vũng Tàu": [
       null,
@@ -49958,7 +49982,11 @@ const xoso_data = {
       19,
       null,
       null,
-      null
+      null,
+      null,
+      null,
+      null,
+      71
     ],
     "Cần Thơ": [
       null,
@@ -57094,6 +57122,10 @@ const xoso_data = {
       null,
       null,
       60,
+      null,
+      null,
+      null,
+      null,
       null,
       null
     ],
@@ -64232,6 +64264,10 @@ const xoso_data = {
       null,
       33,
       null,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "Đồng Nai": [
@@ -71368,6 +71404,10 @@ const xoso_data = {
       null,
       null,
       24,
+      null,
+      null,
+      null,
+      null,
       null,
       null
     ],
@@ -78506,6 +78546,10 @@ const xoso_data = {
       null,
       null,
       37,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "An Giang": [
@@ -85643,6 +85687,10 @@ const xoso_data = {
       null,
       null,
       77,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "Bình Thuận": [
@@ -92780,6 +92828,10 @@ const xoso_data = {
       null,
       null,
       98,
+      null,
+      null,
+      null,
+      null,
       null
     ],
     "Bình Dương": [
@@ -99917,7 +99969,11 @@ const xoso_data = {
       null,
       null,
       null,
-      62
+      62,
+      null,
+      null,
+      null,
+      null
     ],
     "Trà Vinh": [
       null,
@@ -107054,7 +107110,11 @@ const xoso_data = {
       null,
       null,
       null,
-      81
+      81,
+      null,
+      null,
+      null,
+      null
     ],
     "Vĩnh Long": [
       null,
@@ -114191,7 +114251,11 @@ const xoso_data = {
       null,
       null,
       null,
-      46
+      46,
+      null,
+      null,
+      null,
+      null
     ],
     "Long An": [
       null,
@@ -121326,6 +121390,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      73,
       null,
       null,
       null
@@ -128465,6 +128533,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      60,
+      null,
+      null,
       null
     ],
     "Hậu Giang": [
@@ -135600,6 +135672,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      26,
       null,
       null,
       null
@@ -142739,6 +142815,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      10,
+      null,
       null
     ],
     "Tiền Giang": [
@@ -149876,6 +149956,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      74,
+      null,
       null
     ],
     "Kiên Giang": [
@@ -157012,6 +157096,10 @@ const xoso_data = {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      10,
       null,
       null
     ]
